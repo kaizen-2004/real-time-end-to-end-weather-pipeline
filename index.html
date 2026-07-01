@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Weather Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 30px 0; }
+        header h1 { font-size: 2.5rem; background: linear-gradient(90deg, #00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        header p { color: #8892b0; margin-top: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
+        .stat-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .stat-card h3 { color: #64ffda; font-size: 2rem; }
+        .stat-card p { color: #8892b0; margin-top: 5px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 30px; }
+        .card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card h2 { color: #ccd6f6; margin-bottom: 20px; font-size: 1.2rem; }
+        .city-list { list-style: none; }
+        .city-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .city-item:last-child { border-bottom: none; }
+        .city-name { font-weight: 600; }
+        .city-temp { font-size: 1.5rem; color: #64ffda; }
+        .city-condition { color: #8892b0; font-size: 0.9rem; }
+        .weather-icon { font-size: 2rem; margin-right: 10px; }
+        .chart-container { position: relative; height: 300px; }
+        .refresh-btn { background: linear-gradient(90deg, #00d2ff, #3a7bd5); border: none; padding: 12px 30px; border-radius: 25px; color: #fff; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        .refresh-btn:hover { transform: scale(1.05); }
+        .last-updated { color: #8892b0; font-size: 0.9rem; margin-top: 10px; }
+        .tech-stack { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+        .tech-badge { background: rgba(100, 255, 218, 0.1); border: 1px solid #64ffda; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; color: #64ffda; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇵🇭 Philippine Weather Dashboard</h1>
+            <p>Real-time weather data pipeline • Airflow + dbt + Snowflake</p>
+            <div class="tech-stack">
+                <span class="tech-badge">Apache Airflow</span>
+                <span class="tech-badge">PostgreSQL</span>
+                <span class="tech-badge">dbt</span>
+                <span class="tech-badge">Snowflake</span>
+                <span class="tech-badge">Docker</span>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="city-count">5</h3>
+                <p>Cities Tracked</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avg-temp">--°F</h3>
+                <p>Avg Temperature</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avg-humidity">--%</h3>
+                <p>Avg Humidity</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="last-update">--</h3>
+                <p>Last Updated</p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>🌡️ Current Weather by City</h2>
+                <ul class="city-list" id="city-weather">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+            <div class="card">
+                <h2>📊 Temperature Comparison</h2>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2>💧 Humidity Levels</h2>
+                <div class="chart-container">
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🌤️ Weather Conditions</h2>
+                <div class="chart-container">
+                    <canvas id="conditionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            <p class="last-updated">Auto-refreshes every 30 minutes</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - replace with actual API/Snowflake connection
+        const weatherData = [
+            { city: "Manila", temp: 88, humidity: 75, condition: "Partly Cloudy", icon: "⛅" },
+            { city: "Cebu City", temp: 86, humidity: 80, condition: "Sunny", icon: "☀️" },
+            { city: "Davao City", temp: 84, humidity: 82, condition: "Light Rain", icon: "🌧️" },
+            { city: "Makati", temp: 87, humidity: 76, condition: "Cloudy", icon: "☁️" },
+            { city: "Quezon City", temp: 85, humidity: 78, condition: "Clear", icon: "🌤️" }
+        ];
+
+        function getWeatherIcon(condition) {
+            const icons = {
+                'Clear': '☀️', 'Sunny': '☀️', 'Partly Cloudy': '⛅',
+                'Cloudy': '☁️', 'Overcast': '☁️', 'Light Rain': '🌧️',
+                'Rain': '🌧️', 'Thunderstorm': '⛈️', 'Haze': '🌫️'
+            };
+            return icons[condition] || '🌤️';
+        }
+
+        function updateDashboard() {
+            // Update city list
+            const cityList = document.getElementById('city-weather');
+            cityList.innerHTML = weatherData.map(city => `
+                <li class="city-item">
+                    <div>
+                        <span class="weather-icon">${getWeatherIcon(city.condition)}</span>
+                        <span class="city-name">${city.city}</span>
+                        <span class="city-condition">${city.condition}</span>
+                    </div>
+                    <span class="city-temp">${city.temp}°F</span>
+                </li>
+            `).join('');
+
+            // Update stats
+            const avgTemp = (weatherData.reduce((a, b) => a + b.temp, 0) / weatherData.length).toFixed(0);
+            const avgHumidity = (weatherData.reduce((a, b) => a + b.humidity, 0) / weatherData.length).toFixed(0);
+            document.getElementById('avg-temp').textContent = `${avgTemp}°F`;
+            document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+
+            // Temperature chart
+            new Chart(document.getElementById('tempChart'), {
+                type: 'bar',
+                data: {
+                    labels: weatherData.map(d => d.city),
+                    datasets: [{
+                        label: 'Temperature (°F)',
+                        data: weatherData.map(d => d.temp),
+                        backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'],
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: false, min: 70, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
+                        x: { grid: { display: false }, ticks: { color: '#8892b0' } }
+                    }
+                }
+            });
+
+            // Humidity chart
+            new Chart(document.getElementById('humidityChart'), {
+                type: 'line',
+                data: {
+                    labels: weatherData.map(d => d.city),
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: weatherData.map(d => d.humidity),
+                        borderColor: '#64ffda',
+                        backgroundColor: 'rgba(100, 255, 218, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: false, min: 60, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
+                        x: { grid: { display: false }, ticks: { color: '#8892b0' } }
+                    }
+                }
+            });
+
+            // Condition pie chart
+            const conditions = {};
+            weatherData.forEach(d => { conditions[d.condition] = (conditions[d.condition] || 0) + 1; });
+            new Chart(document.getElementById('conditionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(conditions),
+                    datasets: [{
+                        data: Object.values(conditions),
+                        backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#8892b0' } } }
+                }
+            });
+        }
+
+        function refreshData() {
+            // In production, fetch from Snowflake API or backend
+            location.reload();
+        }
+
+        // Initialize
+        updateDashboard();
+
+        // Auto-refresh every 30 minutes
+        setInterval(refreshData, 30 * 60 * 1000);
+    </script>
+</body>
+</html>
