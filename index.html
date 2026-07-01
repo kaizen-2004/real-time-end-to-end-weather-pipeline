@@ -21,7 +21,7 @@
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin: 25px 0; }
         .kpi-card { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
         .kpi-card:hover { transform: translateY(-5px); }
-        .kpi-icon { font-size: 2rem; margin-bottom: 10px; }
+        .kpi-icon { font-size: 2rem; margin-bottom: 10px; color: #64ffda; }
         .kpi-value { font-size: 2.2rem; font-weight: bold; }
         .kpi-label { color: #8892b0; font-size: 0.9rem; margin-top: 5px; }
         .kpi-change { font-size: 0.85rem; margin-top: 8px; }
@@ -80,7 +80,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🇵🇭 Philippine Weather Dashboard</h1>
+            <h1>PHILIPPINE WEATHER DASHBOARD</h1>
             <p>Real-time ELT data pipeline for Philippine cities</p>
             <div class="tech-stack">
                 <span class="tech-badge">Apache Airflow</span>
@@ -95,37 +95,37 @@
         <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-icon">🌡️</div>
-                <div class="kpi-value" id="avg-temp">--°C</div>
+                <div class="kpi-icon">[TEMP]</div>
+                <div class="kpi-value" id="avg-temp">--C</div>
                 <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-change kpi-up" id="temp-change">↑ +2°C from yesterday</div>
+                <div class="kpi-change kpi-up" id="temp-change">+2C from yesterday</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">💧</div>
+                <div class="kpi-icon">[HUM]</div>
                 <div class="kpi-value" id="avg-humidity">--%</div>
                 <div class="kpi-label">Average Humidity</div>
-                <div class="kpi-change kpi-down" id="humidity-change">↓ -5% from yesterday</div>
+                <div class="kpi-change kpi-down" id="humidity-change">-5% from yesterday</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">🔥</div>
-                <div class="kpi-value" id="max-temp">--°C</div>
+                <div class="kpi-icon">[HIGH]</div>
+                <div class="kpi-value" id="max-temp">--C</div>
                 <div class="kpi-label">Hottest City</div>
                 <div class="kpi-change" id="max-temp-city">--</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">❄️</div>
-                <div class="kpi-value" id="min-temp">--°C</div>
+                <div class="kpi-icon">[LOW]</div>
+                <div class="kpi-value" id="min-temp">--C</div>
                 <div class="kpi-label">Coolest City</div>
                 <div class="kpi-change" id="min-temp-city">--</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">📊</div>
+                <div class="kpi-icon">[CTY]</div>
                 <div class="kpi-value">5</div>
                 <div class="kpi-label">Cities Monitored</div>
                 <div class="kpi-change kpi-neutral">Real-time tracking</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">⏰</div>
+                <div class="kpi-icon">[INT]</div>
                 <div class="kpi-value">30m</div>
                 <div class="kpi-label">Refresh Interval</div>
                 <div class="kpi-change kpi-neutral" id="last-update">Last: --</div>
@@ -134,85 +134,85 @@
 
         <!-- Map Section -->
         <div class="map-section">
-            <h2>🗺️ Geospatial Weather Map</h2>
+            <h2>GEOSPATIAL WEATHER MAP</h2>
             <div id="map"></div>
         </div>
 
         <!-- Dashboard Grid -->
         <div class="dashboard-grid">
             <div class="card">
-                <h2>📍 City Weather Overview</h2>
+                <h2>CITY WEATHER OVERVIEW</h2>
                 <ul class="city-list" id="city-weather"></ul>
             </div>
             <div class="card">
-                <h2>📊 Temperature Comparison</h2>
+                <h2>TEMPERATURE COMPARISON</h2>
                 <div class="chart-container">
                     <canvas id="tempChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>💡 Insight</h4>
+                    <h4>INSIGHT</h4>
                     <p id="temp-insight">Loading temperature insights...</p>
                 </div>
             </div>
             <div class="card">
-                <h2>💧 Humidity Distribution</h2>
+                <h2>HUMIDITY DISTRIBUTION</h2>
                 <div class="chart-container">
                     <canvas id="humidityChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>💡 Insight</h4>
+                    <h4>INSIGHT</h4>
                     <p id="humidity-insight">Loading humidity insights...</p>
                 </div>
             </div>
             <div class="card">
-                <h2>🌤️ Weather Conditions</h2>
+                <h2>WEATHER CONDITIONS</h2>
                 <div class="chart-container">
                     <canvas id="conditionChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>💡 Insight</h4>
+                    <h4>INSIGHT</h4>
                     <p id="condition-insight">Loading weather insights...</p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="refresh-btn" onclick="refreshData()">REFRESH DATA</button>
             <p class="last-updated">Auto-refreshes every 30 minutes</p>
         </div>
 
         <!-- Credits Section -->
         <div class="card" style="margin-top: 30px;">
-            <h2>📋 Project Credits & Information</h2>
+            <h2>PROJECT CREDITS & INFORMATION</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
                 <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">👨‍💻 Developer</h4>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">DEVELOPER</h4>
                     <p style="color: #ccd6f6;">Steve A. Villa</p>
                     <p style="color: #8892b0; font-size: 0.9rem;">BS Computer Engineering</p>
-                    <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">Portfolio ↗</a>
+                    <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">Portfolio</a>
                 </div>
                 <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">🌤️ Data Source</h4>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">DATA SOURCE</h4>
                     <p style="color: #ccd6f6;">OpenWeatherMap API</p>
                     <p style="color: #8892b0; font-size: 0.9rem;">Free tier: 1,000 calls/day</p>
-                    <a href="https://openweathermap.org/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">openweathermap.org ↗</a>
+                    <a href="https://openweathermap.org/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">openweathermap.org</a>
                 </div>
                 <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">🛠️ Tech Stack</h4>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">TECH STACK</h4>
                     <p style="color: #ccd6f6;">Apache Airflow 2.9</p>
                     <p style="color: #ccd6f6;">PostgreSQL 16 + dbt 1.7</p>
                     <p style="color: #ccd6f6;">Snowflake + Docker</p>
                 </div>
                 <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">🔗 Links</h4>
-                    <p><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank" style="color: #00d2ff; text-decoration: none;">GitHub Repo ↗</a></p>
-                    <p><a href="https://app.snowflake.com/" target="_blank" style="color: #00d2ff; text-decoration: none;">Snowflake Dashboard ↗</a></p>
-                    <p><a href="http://localhost:8080" style="color: #8892b0; text-decoration: none; font-size: 0.85rem;">Airflow UI (local) ↗</a></p>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">LINKS</h4>
+                    <p><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank" style="color: #00d2ff; text-decoration: none;">GitHub Repo</a></p>
+                    <p><a href="https://app.snowflake.com/" target="_blank" style="color: #00d2ff; text-decoration: none;">Snowflake Dashboard</a></p>
+                    <p><a href="http://localhost:8080" style="color: #8892b0; text-decoration: none; font-size: 0.85rem;">Airflow UI (local)</a></p>
                 </div>
             </div>
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
                 <p style="color: #8892b0; font-size: 0.85rem;">
-                    Built with ❤️ by Steve A. Villa • Data refreshed every 30 minutes • 
+                    Built with care by Steve A. Villa | Data refreshed every 30 minutes |
                     <span style="color: #64ffda;">Weather data for 5 Philippine cities</span>
                 </p>
             </div>
@@ -230,11 +230,11 @@
 
         function getWeatherIcon(condition) {
             const icons = {
-                'Clear': '☀️', 'Sunny': '☀️', 'Partly Cloudy': '⛅',
-                'Cloudy': '☁️', 'Overcast': '☁️', 'Light Rain': '🌧️',
-                'Rain': '🌧️', 'Thunderstorm': '⛈️', 'Haze': '🌫️'
+                'Clear': 'SUN', 'Sunny': 'SUN', 'Partly Cloudy': 'PCLOUD',
+                'Cloudy': 'CLOUD', 'Overcast': 'CLOUD', 'Light Rain': 'RAIN',
+                'Rain': 'RAIN', 'Thunderstorm': 'STORM', 'Haze': 'HAZE'
             };
-            return icons[condition] || '🌤️';
+            return icons[condition] || 'CLEAR';
         }
 
         function getMarkerColor(temp) {
@@ -247,7 +247,7 @@
         function initMap() {
             const map = L.map('map').setView([12.8797, 121.7740], 6);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '© OpenStreetMap contributors © CARTO',
+                attribution: 'OpenStreetMap contributors, CARTO',
                 maxZoom: 19
             }).addTo(map);
 
@@ -259,11 +259,11 @@
 
                 marker.bindPopup(`
                     <div class="popup-content">
-                        <div class="popup-city">${getWeatherIcon(city.condition)} ${city.city}</div>
-                        <div class="popup-temp">${city.temp}°C</div>
+                        <div class="popup-city">${city.city}</div>
+                        <div class="popup-temp">${city.temp}C</div>
                         <div class="popup-condition">${city.condition}</div>
                         <div class="popup-details">
-                            Feels like: ${city.feelsLike}°C<br>
+                            Feels like: ${city.feelsLike}C<br>
                             Humidity: ${city.humidity}%<br>
                             Wind: ${city.wind} km/h
                         </div>
@@ -284,18 +284,17 @@
             const hottest = weatherData.find(d => d.temp === maxTemp);
             const coolest = weatherData.find(d => d.temp === minTemp);
 
-            document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
+            document.getElementById('avg-temp').textContent = `${avgTemp}C`;
             document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
-            document.getElementById('max-temp').textContent = `${maxTemp}°C`;
+            document.getElementById('max-temp').textContent = `${maxTemp}C`;
             document.getElementById('max-temp-city').textContent = hottest.city;
-            document.getElementById('min-temp').textContent = `${minTemp}°C`;
+            document.getElementById('min-temp').textContent = `${minTemp}C`;
             document.getElementById('min-temp-city').textContent = coolest.city;
             document.getElementById('last-update').textContent = `Last: ${new Date().toLocaleTimeString()}`;
 
-            // Insights
             const tempRange = maxTemp - minTemp;
             document.getElementById('temp-insight').textContent =
-                `Temperature range across Philippines is ${tempRange}°C. ${hottest.city} is currently the hottest at ${maxTemp}°C, while ${coolest.city} is the coolest at ${minTemp}°C.`;
+                `Temperature range across Philippines is ${tempRange}C. ${hottest.city} is currently the hottest at ${maxTemp}C, while ${coolest.city} is the coolest at ${minTemp}C.`;
 
             const maxHumidity = Math.max(...humidities);
             const mostHumid = weatherData.find(d => d.humidity === maxHumidity);
@@ -315,12 +314,12 @@
                         <span class="weather-icon">${getWeatherIcon(city.condition)}</span>
                         <div>
                             <div class="city-name">${city.city}</div>
-                            <div class="city-condition">${city.condition} • Feels like ${city.feelsLike}°C</div>
+                            <div class="city-condition">${city.condition} - Feels like ${city.feelsLike}C</div>
                         </div>
                     </div>
                     <div class="city-right">
-                        <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}°C</div>
-                        <div class="city-humidity">💧 ${city.humidity}%</div>
+                        <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}C</div>
+                        <div class="city-humidity">HUM: ${city.humidity}%</div>
                     </div>
                 </li>
             `).join('');
@@ -332,7 +331,7 @@
                 data: {
                     labels: weatherData.map(d => d.city),
                     datasets: [{
-                        label: 'Temperature (°C)',
+                        label: 'Temperature (C)',
                         data: weatherData.map(d => d.temp),
                         backgroundColor: weatherData.map(d => getMarkerColor(d.temp)),
                         borderRadius: 10, barThickness: 40
