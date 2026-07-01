@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Philippine Weather Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; }
@@ -27,11 +29,18 @@
         .city-condition { color: #8892b0; font-size: 0.9rem; }
         .weather-icon { font-size: 2rem; margin-right: 10px; }
         .chart-container { position: relative; height: 300px; }
+        #map { height: 400px; border-radius: 10px; }
         .refresh-btn { background: linear-gradient(90deg, #00d2ff, #3a7bd5); border: none; padding: 12px 30px; border-radius: 25px; color: #fff; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
         .refresh-btn:hover { transform: scale(1.05); }
         .last-updated { color: #8892b0; font-size: 0.9rem; margin-top: 10px; }
         .tech-stack { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
         .tech-badge { background: rgba(100, 255, 218, 0.1); border: 1px solid #64ffda; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; color: #64ffda; }
+        .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 10px; }
+        .leaflet-popup-tip { background: #1a1a2e; }
+        .popup-content { text-align: center; }
+        .popup-city { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .popup-temp { font-size: 2rem; color: #64ffda; }
+        .popup-condition { color: #8892b0; }
     </style>
 </head>
 <body>
@@ -54,7 +63,7 @@
                 <p>Cities Tracked</p>
             </div>
             <div class="stat-card">
-                <h3 id="avg-temp">--°F</h3>
+                <h3 id="avg-temp">--°C</h3>
                 <p>Avg Temperature</p>
             </div>
             <div class="stat-card">
@@ -69,10 +78,12 @@
 
         <div class="dashboard-grid">
             <div class="card">
+                <h2>🗺️ Geospatial Weather Map</h2>
+                <div id="map"></div>
+            </div>
+            <div class="card">
                 <h2>🌡️ Current Weather by City</h2>
-                <ul class="city-list" id="city-weather">
-                    <!-- Populated by JS -->
-                </ul>
+                <ul class="city-list" id="city-weather"></ul>
             </div>
             <div class="card">
                 <h2>📊 Temperature Comparison</h2>
@@ -86,12 +97,6 @@
                     <canvas id="humidityChart"></canvas>
                 </div>
             </div>
-            <div class="card">
-                <h2>🌤️ Weather Conditions</h2>
-                <div class="chart-container">
-                    <canvas id="conditionChart"></canvas>
-                </div>
-            </div>
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
@@ -101,13 +106,12 @@
     </div>
 
     <script>
-        // Sample data - replace with actual API/Snowflake connection
         const weatherData = [
-            { city: "Manila", temp: 88, humidity: 75, condition: "Partly Cloudy", icon: "⛅" },
-            { city: "Cebu City", temp: 86, humidity: 80, condition: "Sunny", icon: "☀️" },
-            { city: "Davao City", temp: 84, humidity: 82, condition: "Light Rain", icon: "🌧️" },
-            { city: "Makati", temp: 87, humidity: 76, condition: "Cloudy", icon: "☁️" },
-            { city: "Quezon City", temp: 85, humidity: 78, condition: "Clear", icon: "🌤️" }
+            { city: "Manila", temp: 31, humidity: 75, condition: "Partly Cloudy", lat: 14.5995, lon: 120.9842, icon: "⛅" },
+            { city: "Cebu City", temp: 29, humidity: 80, condition: "Sunny", lat: 10.3157, lon: 123.8854, icon: "☀️" },
+            { city: "Davao City", temp: 28, humidity: 82, condition: "Light Rain", lat: 7.1907, lon: 125.4553, icon: "🌧️" },
+            { city: "Makati", temp: 30, humidity: 76, condition: "Cloudy", lat: 14.5547, lon: 121.0500, icon: "☁️" },
+            { city: "Quezon City", temp: 29, humidity: 78, condition: "Clear", lat: 14.6760, lon: 121.0437, icon: "🌤️" }
         ];
 
         function getWeatherIcon(condition) {
@@ -119,8 +123,45 @@
             return icons[condition] || '🌤️';
         }
 
+        function getMarkerColor(temp) {
+            if (temp >= 32) return '#ff6b6b';
+            if (temp >= 30) return '#feca57';
+            if (temp >= 28) return '#48dbfb';
+            return '#64ffda';
+        }
+
+        function initMap() {
+            const map = L.map('map').setView([12.8797, 121.7740], 6);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            weatherData.forEach(city => {
+                const color = getMarkerColor(city.temp);
+                const marker = L.circleMarker([city.lat, city.lon], {
+                    radius: 20,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div class="popup-content">
+                        <div class="popup-city">${getWeatherIcon(city.condition)} ${city.city}</div>
+                        <div class="popup-temp">${city.temp}°C</div>
+                        <div class="popup-condition">${city.condition}</div>
+                        <div style="color: #8892b0; font-size: 0.8rem; margin-top: 5px;">💧 ${city.humidity}% humidity</div>
+                    </div>
+                `);
+
+                marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -20] });
+            });
+        }
+
         function updateDashboard() {
-            // Update city list
             const cityList = document.getElementById('city-weather');
             cityList.innerHTML = weatherData.map(city => `
                 <li class="city-item">
@@ -129,41 +170,37 @@
                         <span class="city-name">${city.city}</span>
                         <span class="city-condition">${city.condition}</span>
                     </div>
-                    <span class="city-temp">${city.temp}°F</span>
+                    <span class="city-temp">${city.temp}°C</span>
                 </li>
             `).join('');
 
-            // Update stats
-            const avgTemp = (weatherData.reduce((a, b) => a + b.temp, 0) / weatherData.length).toFixed(0);
+            const avgTemp = (weatherData.reduce((a, b) => a + b.temp, 0) / weatherData.length).toFixed(1);
             const avgHumidity = (weatherData.reduce((a, b) => a + b.humidity, 0) / weatherData.length).toFixed(0);
-            document.getElementById('avg-temp').textContent = `${avgTemp}°F`;
+            document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
             document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 
-            // Temperature chart
             new Chart(document.getElementById('tempChart'), {
                 type: 'bar',
                 data: {
                     labels: weatherData.map(d => d.city),
                     datasets: [{
-                        label: 'Temperature (°F)',
+                        label: 'Temperature (°C)',
                         data: weatherData.map(d => d.temp),
-                        backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'],
+                        backgroundColor: weatherData.map(d => getMarkerColor(d.temp)),
                         borderRadius: 10
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: false, min: 70, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
+                        y: { beginAtZero: false, min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
                         x: { grid: { display: false }, ticks: { color: '#8892b0' } }
                     }
                 }
             });
 
-            // Humidity chart
             new Chart(document.getElementById('humidityChart'), {
                 type: 'line',
                 data: {
@@ -173,13 +210,11 @@
                         data: weatherData.map(d => d.humidity),
                         borderColor: '#64ffda',
                         backgroundColor: 'rgba(100, 255, 218, 0.1)',
-                        fill: true,
-                        tension: 0.4
+                        fill: true, tension: 0.4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         y: { beginAtZero: false, min: 60, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
@@ -187,36 +222,12 @@
                     }
                 }
             });
-
-            // Condition pie chart
-            const conditions = {};
-            weatherData.forEach(d => { conditions[d.condition] = (conditions[d.condition] || 0) + 1; });
-            new Chart(document.getElementById('conditionChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(conditions),
-                    datasets: [{
-                        data: Object.values(conditions),
-                        backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#8892b0' } } }
-                }
-            });
         }
 
-        function refreshData() {
-            // In production, fetch from Snowflake API or backend
-            location.reload();
-        }
+        function refreshData() { location.reload(); }
 
-        // Initialize
         updateDashboard();
-
-        // Auto-refresh every 30 minutes
+        initMap();
         setInterval(refreshData, 30 * 60 * 1000);
     </script>
 </body>
