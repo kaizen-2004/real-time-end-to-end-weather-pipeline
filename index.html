@@ -179,7 +179,43 @@
         <div class="footer">
             <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
             <p class="last-updated">Auto-refreshes every 30 minutes</p>
-            <p style="margin-top: 15px; color: #64ffda;">Built with Airflow + dbt + Snowflake</p>
+        </div>
+
+        <!-- Credits Section -->
+        <div class="card" style="margin-top: 30px;">
+            <h2>📋 Project Credits & Information</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
+                <div>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">👨‍💻 Developer</h4>
+                    <p style="color: #ccd6f6;">Steve A. Villa</p>
+                    <p style="color: #8892b0; font-size: 0.9rem;">BS Computer Engineering</p>
+                    <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">Portfolio ↗</a>
+                </div>
+                <div>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">🌤️ Data Source</h4>
+                    <p style="color: #ccd6f6;">OpenWeatherMap API</p>
+                    <p style="color: #8892b0; font-size: 0.9rem;">Free tier: 1,000 calls/day</p>
+                    <a href="https://openweathermap.org/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">openweathermap.org ↗</a>
+                </div>
+                <div>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">🛠️ Tech Stack</h4>
+                    <p style="color: #ccd6f6;">Apache Airflow 2.9</p>
+                    <p style="color: #ccd6f6;">PostgreSQL 16 + dbt 1.7</p>
+                    <p style="color: #ccd6f6;">Snowflake + Docker</p>
+                </div>
+                <div>
+                    <h4 style="color: #64ffda; margin-bottom: 10px;">🔗 Links</h4>
+                    <p><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank" style="color: #00d2ff; text-decoration: none;">GitHub Repo ↗</a></p>
+                    <p><a href="https://app.snowflake.com/" target="_blank" style="color: #00d2ff; text-decoration: none;">Snowflake Dashboard ↗</a></p>
+                    <p><a href="http://localhost:8080" style="color: #8892b0; text-decoration: none; font-size: 0.85rem;">Airflow UI (local) ↗</a></p>
+                </div>
+            </div>
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                <p style="color: #8892b0; font-size: 0.85rem;">
+                    Built with ❤️ by Steve A. Villa • Data refreshed every 30 minutes • 
+                    <span style="color: #64ffda;">Weather data for 5 Philippine cities</span>
+                </p>
+            </div>
         </div>
     </div>
 
