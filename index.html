@@ -9,214 +9,140 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%); color: #fff; min-height: 100vh; }
-        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; padding: 25px 0; }
-        header h1 { font-size: 2.8rem; background: linear-gradient(90deg, #00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        header p { color: #8892b0; margin-top: 10px; font-size: 1.1rem; }
-        .tech-stack { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 15px; }
-        .tech-badge { background: rgba(100, 255, 218, 0.1); border: 1px solid #64ffda; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; color: #64ffda; }
-
-        /* KPI Cards */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin: 25px 0; }
-        .kpi-card { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-5px); }
-        .kpi-icon { font-size: 2rem; margin-bottom: 10px; color: #64ffda; }
-        .kpi-value { font-size: 2.2rem; font-weight: bold; }
-        .kpi-label { color: #8892b0; font-size: 0.9rem; margin-top: 5px; }
-        .kpi-change { font-size: 0.85rem; margin-top: 8px; }
-        .kpi-up { color: #ff6b6b; }
-        .kpi-down { color: #64ffda; }
-        .kpi-neutral { color: #feca57; }
-
-        /* Map Section */
-        .map-section { margin: 30px 0; }
-        .map-section h2 { color: #ccd6f6; margin-bottom: 15px; font-size: 1.3rem; }
-        #map { height: 500px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-
-        /* Dashboard Grid */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 30px; }
-        .card { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border-radius: 15px; padding: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .card h2 { color: #ccd6f6; margin-bottom: 20px; font-size: 1.2rem; }
-
-        /* City List */
-        .city-list { list-style: none; }
-        .city-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.2s; }
-        .city-item:hover { background: rgba(255,255,255,0.05); }
-        .city-item:last-child { border-bottom: none; }
-        .city-left { display: flex; align-items: center; gap: 15px; }
-        .city-name { font-weight: 600; font-size: 1.1rem; }
-        .city-condition { color: #8892b0; font-size: 0.85rem; }
-        .city-right { text-align: right; }
-        .city-temp { font-size: 1.8rem; font-weight: bold; }
-        .city-humidity { color: #8892b0; font-size: 0.85rem; }
-        .weather-icon { font-size: 2.5rem; }
-
-        /* Charts */
-        .chart-container { position: relative; height: 280px; }
-
-        /* Insights */
-        .insight-box { background: rgba(100, 255, 218, 0.1); border-left: 4px solid #64ffda; padding: 15px; border-radius: 0 10px 10px 0; margin-top: 15px; }
-        .insight-box h4 { color: #64ffda; margin-bottom: 8px; }
-        .insight-box p { color: #ccd6f6; font-size: 0.95rem; line-height: 1.5; }
-
-        /* Buttons */
-        .refresh-btn { background: linear-gradient(90deg, #00d2ff, #3a7bd5); border: none; padding: 12px 30px; border-radius: 25px; color: #fff; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
-        .refresh-btn:hover { transform: scale(1.05); }
-        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #8892b0; }
-        .last-updated { color: #8892b0; font-size: 0.9rem; margin-top: 10px; }
-
-        /* Leaflet custom */
-        .leaflet-popup-content-wrapper { background: #1a1a3e; color: #fff; border-radius: 10px; border: 1px solid rgba(100, 255, 218, 0.3); }
-        .leaflet-popup-tip { background: #1a1a3e; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; }
+        
+        /* Header */
+        .header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .header h1 { font-size: 1.4rem; font-weight: 600; color: #fff; }
+        .header span { color: #64ffda; }
+        .header-meta { text-align: right; color: #666; font-size: 0.85rem; }
+        
+        /* Main Layout */
+        .main { padding: 20px 40px; }
+        
+        /* Story Section - Top */
+        .story-banner { background: linear-gradient(135deg, rgba(100,255,218,0.1) 0%, rgba(0,210,255,0.05) 100%); border: 1px solid rgba(100,255,218,0.2); border-radius: 12px; padding: 20px 25px; margin-bottom: 25px; }
+        .story-banner h2 { font-size: 1rem; color: #64ffda; margin-bottom: 8px; font-weight: 500; }
+        .story-banner p { color: #b0b0b0; line-height: 1.6; font-size: 0.95rem; }
+        
+        /* KPI Row */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .kpi { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 18px 20px; }
+        .kpi-label { color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #fff; margin-top: 5px; }
+        .kpi-sub { color: #64ffda; font-size: 0.8rem; margin-top: 5px; }
+        
+        /* Map */
+        .map-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; margin-bottom: 25px; }
+        .map-header { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+        .map-header h3 { font-size: 0.9rem; color: #fff; font-weight: 500; }
+        .map-legend { display: flex; gap: 15px; font-size: 0.75rem; }
+        .legend-item { display: flex; align-items: center; gap: 5px; color: #888; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        #map { height: 350px; }
+        
+        /* City Grid */
+        .city-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 25px; }
+        .city-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 18px; text-align: center; transition: border-color 0.2s; }
+        .city-card:hover { border-color: rgba(100,255,218,0.3); }
+        .city-name { font-size: 0.85rem; color: #888; margin-bottom: 8px; }
+        .city-temp { font-size: 2rem; font-weight: 700; margin-bottom: 5px; }
+        .city-condition { font-size: 0.75rem; color: #666; }
+        .city-detail { font-size: 0.7rem; color: #555; margin-top: 8px; }
+        
+        /* Charts Row */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; }
+        .chart-card h4 { font-size: 0.85rem; color: #888; margin-bottom: 15px; font-weight: 500; }
+        .chart-container { height: 200px; position: relative; }
+        
+        /* Footer */
+        .footer { padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; color: #444; font-size: 0.8rem; }
+        .footer a { color: #64ffda; text-decoration: none; }
+        
+        /* Leaflet */
+        .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 8px; border: 1px solid rgba(100,255,218,0.2); }
+        .leaflet-popup-tip { background: #1a1a2e; }
         .popup-content { text-align: center; padding: 5px; }
-        .popup-city { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-        .popup-temp { font-size: 2.2rem; color: #64ffda; font-weight: bold; }
-        .popup-condition { color: #8892b0; margin-top: 5px; }
-        .popup-details { color: #ccd6f6; font-size: 0.85rem; margin-top: 8px; }
-        .dark-tooltip { background: #1a1a3e !important; color: #fff !important; border: 1px solid #64ffda !important; border-radius: 5px !important; }
+        .popup-city { font-weight: 600; margin-bottom: 5px; }
+        .popup-temp { font-size: 1.5rem; color: #64ffda; font-weight: 700; }
+        .popup-details { color: #888; font-size: 0.8rem; margin-top: 8px; }
+        .dark-tooltip { background: #1a1a2e !important; color: #fff !important; border: 1px solid #64ffda !important; border-radius: 4px !important; font-size: 0.8rem !important; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🇵🇭 PHILIPPINE WEATHER DASHBOARD</h1>
-            <p>Real-time ELT data pipeline for Philippine cities</p>
-            <div class="tech-stack">
-                <span class="tech-badge">Apache Airflow</span>
-                <span class="tech-badge">PostgreSQL</span>
-                <span class="tech-badge">dbt</span>
-                <span class="tech-badge">Snowflake</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">OpenWeatherMap API</span>
-            </div>
-        </header>
-
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-icon">🌡️</div>
-                <div class="kpi-value" id="avg-temp">--°C</div>
+    <div class="header">
+        <h1><span>PH</span> Weather Pipeline</h1>
+        <div class="header-meta">
+            <div>Last updated: <span id="last-update">--</span></div>
+            <div>Refreshes every 30 min</div>
+        </div>
+    </div>
+    
+    <div class="main">
+        <!-- Story Banner -->
+        <div class="story-banner">
+            <h2>Today's Weather Story</h2>
+            <p id="story-text">Loading weather insights...</p>
+        </div>
+        
+        <!-- KPIs -->
+        <div class="kpi-row">
+            <div class="kpi">
                 <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-change kpi-up" id="temp-change">↑ +2°C from yesterday</div>
+                <div class="kpi-value" id="avg-temp">--</div>
+                <div class="kpi-sub" id="temp-range">--</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">💧</div>
-                <div class="kpi-value" id="avg-humidity">--%</div>
-                <div class="kpi-label">Average Humidity</div>
-                <div class="kpi-change kpi-down" id="humidity-change">↓ -5% from yesterday</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">🔥</div>
-                <div class="kpi-value" id="max-temp">--°C</div>
+            <div class="kpi">
                 <div class="kpi-label">Hottest City</div>
-                <div class="kpi-change" id="max-temp-city">--</div>
+                <div class="kpi-value" id="max-temp">--</div>
+                <div class="kpi-sub" id="max-city">--</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">❄️</div>
-                <div class="kpi-value" id="min-temp">--°C</div>
+            <div class="kpi">
                 <div class="kpi-label">Coolest City</div>
-                <div class="kpi-change" id="min-temp-city">--</div>
+                <div class="kpi-value" id="min-temp">--</div>
+                <div class="kpi-sub" id="min-city">--</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">📊</div>
-                <div class="kpi-value">5</div>
-                <div class="kpi-label">Cities Monitored</div>
-                <div class="kpi-change kpi-neutral">Real-time tracking</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">⏰</div>
-                <div class="kpi-value">30m</div>
-                <div class="kpi-label">Refresh Interval</div>
-                <div class="kpi-change kpi-neutral" id="last-update">Last: --</div>
+            <div class="kpi">
+                <div class="kpi-label">Avg Humidity</div>
+                <div class="kpi-value" id="avg-humidity">--</div>
+                <div class="kpi-sub">across all cities</div>
             </div>
         </div>
-
-        <!-- Map Section -->
-        <div class="map-section">
-            <h2>🗺️ GEOSPATIAL WEATHER MAP</h2>
+        
+        <!-- Map -->
+        <div class="map-container">
+            <div class="map-header">
+                <h3>CITY OVERVIEW</h3>
+                <div class="map-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div> 32°C+</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#feca57"></div> 30-31°C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#48dbfb"></div> 28-29°C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#64ffda"></div> Below 28°C</div>
+                </div>
+            </div>
             <div id="map"></div>
         </div>
-
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <div class="card">
-                <h2>📍 CITY WEATHER OVERVIEW</h2>
-                <ul class="city-list" id="city-weather"></ul>
+        
+        <!-- City Cards -->
+        <div class="city-grid" id="city-grid"></div>
+        
+        <!-- Charts -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <h4>TEMPERATURE BY CITY</h4>
+                <div class="chart-container"><canvas id="tempChart"></canvas></div>
             </div>
-            <div class="card">
-                <h2>📊 TEMPERATURE COMPARISON</h2>
-                <div class="chart-container">
-                    <canvas id="tempChart"></canvas>
-                </div>
-                <div class="insight-box">
-                    <h4>💡 INSIGHT</h4>
-                    <p id="temp-insight">Loading temperature insights...</p>
-                </div>
-            </div>
-            <div class="card">
-                <h2>💧 HUMIDITY DISTRIBUTION</h2>
-                <div class="chart-container">
-                    <canvas id="humidityChart"></canvas>
-                </div>
-                <div class="insight-box">
-                    <h4>💡 INSIGHT</h4>
-                    <p id="humidity-insight">Loading humidity insights...</p>
-                </div>
-            </div>
-            <div class="card">
-                <h2>🌤️ WEATHER CONDITIONS</h2>
-                <div class="chart-container">
-                    <canvas id="conditionChart"></canvas>
-                </div>
-                <div class="insight-box">
-                    <h4>💡 INSIGHT</h4>
-                    <p id="condition-insight">Loading weather insights...</p>
-                </div>
+            <div class="chart-card">
+                <h4>HUMIDITY DISTRIBUTION</h4>
+                <div class="chart-container"><canvas id="humidityChart"></canvas></div>
             </div>
         </div>
-
-        <div class="footer">
-            <button class="refresh-btn" onclick="refreshData()">🔄 REFRESH DATA</button>
-            <p class="last-updated">Auto-refreshes every 30 minutes</p>
-        </div>
-
-        <!-- Credits Section -->
-        <div class="card" style="margin-top: 30px;">
-            <h2>PROJECT CREDITS & INFORMATION</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
-                <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">DEVELOPER</h4>
-                    <p style="color: #ccd6f6;">Steve A. Villa</p>
-                    <p style="color: #8892b0; font-size: 0.9rem;">BS Computer Engineering</p>
-                    <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">Portfolio</a>
-                </div>
-                <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">DATA SOURCE</h4>
-                    <p style="color: #ccd6f6;">OpenWeatherMap API</p>
-                    <p style="color: #8892b0; font-size: 0.9rem;">Free tier: 1,000 calls/day</p>
-                    <a href="https://openweathermap.org/" target="_blank" style="color: #00d2ff; text-decoration: none; font-size: 0.9rem;">openweathermap.org</a>
-                </div>
-                <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">TECH STACK</h4>
-                    <p style="color: #ccd6f6;">Apache Airflow 2.9</p>
-                    <p style="color: #ccd6f6;">PostgreSQL 16 + dbt 1.7</p>
-                    <p style="color: #ccd6f6;">Snowflake + Docker</p>
-                </div>
-                <div>
-                    <h4 style="color: #64ffda; margin-bottom: 10px;">LINKS</h4>
-                    <p><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank" style="color: #00d2ff; text-decoration: none;">GitHub Repo</a></p>
-                    <p><a href="https://app.snowflake.com/" target="_blank" style="color: #00d2ff; text-decoration: none;">Snowflake Dashboard</a></p>
-                    <p><a href="http://localhost:8080" style="color: #8892b0; text-decoration: none; font-size: 0.85rem;">Airflow UI (local)</a></p>
-                </div>
-            </div>
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
-                <p style="color: #8892b0; font-size: 0.85rem;">
-                    Built with care by Steve A. Villa | Data refreshed every 30 minutes |
-                    <span style="color: #64ffda;">Weather data for 5 Philippine cities</span>
-                </p>
-            </div>
-        </div>
+    </div>
+    
+    <div class="footer">
+        <div>Built by <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank">Steve A. Villa</a> | Data: OpenWeatherMap API</div>
+        <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
     </div>
 
     <script>
@@ -228,15 +154,6 @@
             { city: "Quezon City", temp: 29, humidity: 78, condition: "Clear", lat: 14.6760, lon: 121.0437, feelsLike: 31, wind: 9 }
         ];
 
-        function getWeatherIcon(condition) {
-            const icons = {
-                'Clear': '☀️', 'Sunny': '☀️', 'Partly Cloudy': '⛅',
-                'Cloudy': '☁️', 'Overcast': '☁️', 'Light Rain': '🌧️',
-                'Rain': '🌧️', 'Thunderstorm': '⛈️', 'Haze': '🌫️'
-            };
-            return icons[condition] || '🌤️';
-        }
-
         function getMarkerColor(temp) {
             if (temp >= 32) return '#ff6b6b';
             if (temp >= 30) return '#feca57';
@@ -244,34 +161,22 @@
             return '#64ffda';
         }
 
-        function initMap() {
-            const map = L.map('map').setView([12.8797, 121.7740], 6);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: 'OpenStreetMap contributors, CARTO',
-                maxZoom: 19
-            }).addTo(map);
-
-            weatherData.forEach(city => {
-                const color = getMarkerColor(city.temp);
-                const marker = L.circleMarker([city.lat, city.lon], {
-                    radius: 25, fillColor: color, color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.85
-                }).addTo(map);
-
-                marker.bindPopup(`
-                    <div class="popup-content">
-                        <div class="popup-city">${city.city}</div>
-                        <div class="popup-temp">${city.temp}°C</div>
-                        <div class="popup-condition">${city.condition}</div>
-                        <div class="popup-details">
-                            Feels like: ${city.feelsLike}°C<br>
-                            Humidity: ${city.humidity}%<br>
-                            Wind: ${city.wind} km/h
-                        </div>
-                    </div>
-                `);
-
-                marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -25] });
-            });
+        function generateStory() {
+            const temps = weatherData.map(d => d.temp);
+            const maxTemp = Math.max(...temps);
+            const minTemp = Math.min(...temps);
+            const hottest = weatherData.find(d => d.temp === maxTemp);
+            const coolest = weatherData.find(d => d.temp === minTemp);
+            const rainy = weatherData.filter(d => d.condition.includes('Rain'));
+            
+            let story = `It's a warm day across the Philippines. `;
+            story += `${hottest.city} leads at ${maxTemp}°C, while ${coolest.city} is the coolest at ${minTemp}°C. `;
+            if (rainy.length > 0) {
+                story += `Expect rain in ${rainy.map(d => d.city).join(' and ')}. `;
+            }
+            story += `Humidity is moderate across all cities.`;
+            
+            document.getElementById('story-text').textContent = story;
         }
 
         function updateKPIs() {
@@ -285,44 +190,52 @@
             const coolest = weatherData.find(d => d.temp === minTemp);
 
             document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
-            document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
+            document.getElementById('temp-range').textContent = `Range: ${minTemp}°C - ${maxTemp}°C`;
             document.getElementById('max-temp').textContent = `${maxTemp}°C`;
-            document.getElementById('max-temp-city').textContent = hottest.city;
+            document.getElementById('max-city').textContent = hottest.city;
             document.getElementById('min-temp').textContent = `${minTemp}°C`;
-            document.getElementById('min-temp-city').textContent = coolest.city;
-            document.getElementById('last-update').textContent = `Last: ${new Date().toLocaleTimeString()}`;
-
-            const tempRange = maxTemp - minTemp;
-            document.getElementById('temp-insight').textContent =
-                `Temperature range across Philippines is ${tempRange}C. ${hottest.city} is currently the hottest at ${maxTemp}C, while ${coolest.city} is the coolest at ${minTemp}C.`;
-
-            const maxHumidity = Math.max(...humidities);
-            const mostHumid = weatherData.find(d => d.humidity === maxHumidity);
-            document.getElementById('humidity-insight').textContent =
-                `${mostHumid.city} has the highest humidity at ${maxHumidity}%. High humidity can make temperatures feel warmer than actual.`;
-
-            const conditions = [...new Set(weatherData.map(d => d.condition))];
-            document.getElementById('condition-insight').textContent =
-                `Current conditions across monitored cities: ${conditions.join(', ')}. Weather varies across the archipelago due to geographic diversity.`;
+            document.getElementById('min-city').textContent = coolest.city;
+            document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
 
-        function updateCityList() {
-            const cityList = document.getElementById('city-weather');
-            cityList.innerHTML = weatherData.map(city => `
-                <li class="city-item">
-                    <div class="city-left">
-                        <span class="weather-icon">${getWeatherIcon(city.condition)}</span>
-                        <div>
-                            <div class="city-name">${city.city}</div>
-                            <div class="city-condition">${city.condition} - Feels like ${city.feelsLike}C</div>
+        function renderCityCards() {
+            const grid = document.getElementById('city-grid');
+            grid.innerHTML = weatherData.map(city => `
+                <div class="city-card">
+                    <div class="city-name">${city.city}</div>
+                    <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}°C</div>
+                    <div class="city-condition">${city.condition}</div>
+                    <div class="city-detail">Feels ${city.feelsLike}°C | ${city.humidity}% | ${city.wind}km/h</div>
+                </div>
+            `).join('');
+        }
+
+        function initMap() {
+            const map = L.map('map', { zoomControl: false }).setView([12.8797, 121.7740], 6);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: 'OpenStreetMap, CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            weatherData.forEach(city => {
+                const marker = L.circleMarker([city.lat, city.lon], {
+                    radius: 20, fillColor: getMarkerColor(city.temp), color: '#fff', weight: 2, fillOpacity: 0.9
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div class="popup-content">
+                        <div class="popup-city">${city.city}</div>
+                        <div class="popup-temp">${city.temp}°C</div>
+                        <div class="popup-details">
+                            ${city.condition}<br>
+                            Feels like ${city.feelsLike}°C | ${city.humidity}% humidity
                         </div>
                     </div>
-                    <div class="city-right">
-                        <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}°C</div>
-                        <div class="city-humidity">💧 ${city.humidity}%</div>
-                    </div>
-                </li>
-            `).join('');
+                `);
+
+                marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -15] });
+            });
         }
 
         function initCharts() {
@@ -331,64 +244,47 @@
                 data: {
                     labels: weatherData.map(d => d.city),
                     datasets: [{
-                        label: 'Temperature (C)',
                         data: weatherData.map(d => d.temp),
                         backgroundColor: weatherData.map(d => getMarkerColor(d.temp)),
-                        borderRadius: 10, barThickness: 40
+                        borderRadius: 6, barThickness: 30
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: false, min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0' } },
-                        x: { grid: { display: false }, ticks: { color: '#8892b0' } }
+                        y: { min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
+                        x: { grid: { display: false }, ticks: { color: '#666' } }
                     }
                 }
             });
 
             new Chart(document.getElementById('humidityChart'), {
-                type: 'radar',
+                type: 'bar',
                 data: {
                     labels: weatherData.map(d => d.city),
                     datasets: [{
-                        label: 'Humidity (%)',
                         data: weatherData.map(d => d.humidity),
-                        backgroundColor: 'rgba(100, 255, 218, 0.2)',
-                        borderColor: '#64ffda',
-                        pointBackgroundColor: '#64ffda',
-                        pointBorderColor: '#fff'
+                        backgroundColor: 'rgba(100, 255, 218, 0.6)',
+                        borderRadius: 6, barThickness: 30
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { r: { beginAtZero: false, min: 60, max: 90, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0', backdropColor: 'transparent' }, pointLabels: { color: '#ccd6f6' } } }
-                }
-            });
-
-            const conditionCounts = {};
-            weatherData.forEach(d => { conditionCounts[d.condition] = (conditionCounts[d.condition] || 0) + 1; });
-            new Chart(document.getElementById('conditionChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(conditionCounts),
-                    datasets: [{ data: Object.values(conditionCounts), backgroundColor: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#64ffda'], borderWidth: 0 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '60%',
-                    plugins: { legend: { position: 'bottom', labels: { color: '#8892b0', padding: 15 } } }
+                    scales: {
+                        y: { min: 60, max: 90, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
+                        x: { grid: { display: false }, ticks: { color: '#666' } }
+                    }
                 }
             });
         }
 
-        function refreshData() { location.reload(); }
-
+        generateStory();
         updateKPIs();
-        updateCityList();
-        initCharts();
+        renderCityCards();
         initMap();
-        setInterval(refreshData, 30 * 60 * 1000);
+        initCharts();
     </script>
 </body>
 </html>
