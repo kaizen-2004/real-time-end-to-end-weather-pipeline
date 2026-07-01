@@ -80,7 +80,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>PHILIPPINE WEATHER DASHBOARD</h1>
+            <h1>🇵🇭 PHILIPPINE WEATHER DASHBOARD</h1>
             <p>Real-time ELT data pipeline for Philippine cities</p>
             <div class="tech-stack">
                 <span class="tech-badge">Apache Airflow</span>
@@ -95,37 +95,37 @@
         <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-icon">[TEMP]</div>
-                <div class="kpi-value" id="avg-temp">--C</div>
+                <div class="kpi-icon">🌡️</div>
+                <div class="kpi-value" id="avg-temp">--°C</div>
                 <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-change kpi-up" id="temp-change">+2C from yesterday</div>
+                <div class="kpi-change kpi-up" id="temp-change">↑ +2°C from yesterday</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">[HUM]</div>
+                <div class="kpi-icon">💧</div>
                 <div class="kpi-value" id="avg-humidity">--%</div>
                 <div class="kpi-label">Average Humidity</div>
-                <div class="kpi-change kpi-down" id="humidity-change">-5% from yesterday</div>
+                <div class="kpi-change kpi-down" id="humidity-change">↓ -5% from yesterday</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">[HIGH]</div>
-                <div class="kpi-value" id="max-temp">--C</div>
+                <div class="kpi-icon">🔥</div>
+                <div class="kpi-value" id="max-temp">--°C</div>
                 <div class="kpi-label">Hottest City</div>
                 <div class="kpi-change" id="max-temp-city">--</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">[LOW]</div>
-                <div class="kpi-value" id="min-temp">--C</div>
+                <div class="kpi-icon">❄️</div>
+                <div class="kpi-value" id="min-temp">--°C</div>
                 <div class="kpi-label">Coolest City</div>
                 <div class="kpi-change" id="min-temp-city">--</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">[CTY]</div>
+                <div class="kpi-icon">📊</div>
                 <div class="kpi-value">5</div>
                 <div class="kpi-label">Cities Monitored</div>
                 <div class="kpi-change kpi-neutral">Real-time tracking</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon">[INT]</div>
+                <div class="kpi-icon">⏰</div>
                 <div class="kpi-value">30m</div>
                 <div class="kpi-label">Refresh Interval</div>
                 <div class="kpi-change kpi-neutral" id="last-update">Last: --</div>
@@ -134,50 +134,50 @@
 
         <!-- Map Section -->
         <div class="map-section">
-            <h2>GEOSPATIAL WEATHER MAP</h2>
+            <h2>🗺️ GEOSPATIAL WEATHER MAP</h2>
             <div id="map"></div>
         </div>
 
         <!-- Dashboard Grid -->
         <div class="dashboard-grid">
             <div class="card">
-                <h2>CITY WEATHER OVERVIEW</h2>
+                <h2>📍 CITY WEATHER OVERVIEW</h2>
                 <ul class="city-list" id="city-weather"></ul>
             </div>
             <div class="card">
-                <h2>TEMPERATURE COMPARISON</h2>
+                <h2>📊 TEMPERATURE COMPARISON</h2>
                 <div class="chart-container">
                     <canvas id="tempChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>INSIGHT</h4>
+                    <h4>💡 INSIGHT</h4>
                     <p id="temp-insight">Loading temperature insights...</p>
                 </div>
             </div>
             <div class="card">
-                <h2>HUMIDITY DISTRIBUTION</h2>
+                <h2>💧 HUMIDITY DISTRIBUTION</h2>
                 <div class="chart-container">
                     <canvas id="humidityChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>INSIGHT</h4>
+                    <h4>💡 INSIGHT</h4>
                     <p id="humidity-insight">Loading humidity insights...</p>
                 </div>
             </div>
             <div class="card">
-                <h2>WEATHER CONDITIONS</h2>
+                <h2>🌤️ WEATHER CONDITIONS</h2>
                 <div class="chart-container">
                     <canvas id="conditionChart"></canvas>
                 </div>
                 <div class="insight-box">
-                    <h4>INSIGHT</h4>
+                    <h4>💡 INSIGHT</h4>
                     <p id="condition-insight">Loading weather insights...</p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <button class="refresh-btn" onclick="refreshData()">REFRESH DATA</button>
+            <button class="refresh-btn" onclick="refreshData()">🔄 REFRESH DATA</button>
             <p class="last-updated">Auto-refreshes every 30 minutes</p>
         </div>
 
@@ -230,11 +230,11 @@
 
         function getWeatherIcon(condition) {
             const icons = {
-                'Clear': 'SUN', 'Sunny': 'SUN', 'Partly Cloudy': 'PCLOUD',
-                'Cloudy': 'CLOUD', 'Overcast': 'CLOUD', 'Light Rain': 'RAIN',
-                'Rain': 'RAIN', 'Thunderstorm': 'STORM', 'Haze': 'HAZE'
+                'Clear': '☀️', 'Sunny': '☀️', 'Partly Cloudy': '⛅',
+                'Cloudy': '☁️', 'Overcast': '☁️', 'Light Rain': '🌧️',
+                'Rain': '🌧️', 'Thunderstorm': '⛈️', 'Haze': '🌫️'
             };
-            return icons[condition] || 'CLEAR';
+            return icons[condition] || '🌤️';
         }
 
         function getMarkerColor(temp) {
@@ -260,10 +260,10 @@
                 marker.bindPopup(`
                     <div class="popup-content">
                         <div class="popup-city">${city.city}</div>
-                        <div class="popup-temp">${city.temp}C</div>
+                        <div class="popup-temp">${city.temp}°C</div>
                         <div class="popup-condition">${city.condition}</div>
                         <div class="popup-details">
-                            Feels like: ${city.feelsLike}C<br>
+                            Feels like: ${city.feelsLike}°C<br>
                             Humidity: ${city.humidity}%<br>
                             Wind: ${city.wind} km/h
                         </div>
@@ -284,11 +284,11 @@
             const hottest = weatherData.find(d => d.temp === maxTemp);
             const coolest = weatherData.find(d => d.temp === minTemp);
 
-            document.getElementById('avg-temp').textContent = `${avgTemp}C`;
+            document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
             document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
-            document.getElementById('max-temp').textContent = `${maxTemp}C`;
+            document.getElementById('max-temp').textContent = `${maxTemp}°C`;
             document.getElementById('max-temp-city').textContent = hottest.city;
-            document.getElementById('min-temp').textContent = `${minTemp}C`;
+            document.getElementById('min-temp').textContent = `${minTemp}°C`;
             document.getElementById('min-temp-city').textContent = coolest.city;
             document.getElementById('last-update').textContent = `Last: ${new Date().toLocaleTimeString()}`;
 
@@ -318,8 +318,8 @@
                         </div>
                     </div>
                     <div class="city-right">
-                        <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}C</div>
-                        <div class="city-humidity">HUM: ${city.humidity}%</div>
+                        <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}°C</div>
+                        <div class="city-humidity">💧 ${city.humidity}%</div>
                     </div>
                 </li>
             `).join('');
