@@ -3,90 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philippine Weather Dashboard</title>
+    <title>Philippine Weather Pipeline</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; }
-        
+
         /* Header */
-        .header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .header h1 { font-size: 1.4rem; font-weight: 600; color: #fff; }
-        .header span { color: #64ffda; }
-        .header-meta { text-align: right; color: #666; font-size: 0.85rem; }
-        
-        /* Main Layout */
-        .main { padding: 20px 40px; }
-        
-        /* Story Section - Top */
-        .story-banner { background: linear-gradient(135deg, rgba(100,255,218,0.1) 0%, rgba(0,210,255,0.05) 100%); border: 1px solid rgba(100,255,218,0.2); border-radius: 12px; padding: 20px 25px; margin-bottom: 25px; }
-        .story-banner h2 { font-size: 1rem; color: #64ffda; margin-bottom: 8px; font-weight: 500; }
-        .story-banner p { color: #b0b0b0; line-height: 1.6; font-size: 0.95rem; }
-        
+        .header { padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .header h1 { font-size: 1.2rem; font-weight: 600; color: #fff; }
+        .header h1 span { color: #64ffda; }
+        .header-meta { text-align: right; color: #555; font-size: 0.8rem; line-height: 1.6; }
+
+        /* Problem Statement */
+        .problem-section { padding: 24px 32px; background: rgba(100,255,218,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .problem-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64ffda; margin-bottom: 8px; }
+        .problem-text { font-size: 1rem; color: #b0b0b0; line-height: 1.6; max-width: 900px; }
+        .problem-text strong { color: #fff; }
+
+        /* Main */
+        .main { padding: 24px 32px; }
+
+        /* Section Headers */
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .section-num { background: #64ffda; color: #0a0a1a; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+        .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+        .section-answer { font-size: 0.9rem; color: #64ffda; margin-left: auto; }
+
         /* KPI Row */
-        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .kpi { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 18px 20px; }
-        .kpi-label { color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #fff; margin-top: 5px; }
-        .kpi-sub { color: #64ffda; font-size: 0.8rem; margin-top: 5px; }
-        
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+        .kpi { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; }
+        .kpi-label { color: #555; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 4px; }
+        .kpi-sub { color: #64ffda; font-size: 0.75rem; margin-top: 4px; }
+
         /* Map */
-        .map-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; margin-bottom: 25px; }
-        .map-header { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
-        .map-header h3 { font-size: 0.9rem; color: #fff; font-weight: 500; }
-        .map-legend { display: flex; gap: 15px; font-size: 0.75rem; }
-        .legend-item { display: flex; align-items: center; gap: 5px; color: #888; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-        #map { height: 350px; }
-        
-        /* City Grid */
-        .city-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 25px; }
-        .city-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 18px; text-align: center; transition: border-color 0.2s; }
+        .map-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin-bottom: 32px; }
+        .map-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+        .map-header h3 { font-size: 0.85rem; color: #fff; font-weight: 500; }
+        .map-legend { display: flex; gap: 12px; font-size: 0.7rem; }
+        .legend-item { display: flex; align-items: center; gap: 4px; color: #666; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+        #map { height: 320px; }
+
+        /* City Cards */
+        .city-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 32px; }
+        .city-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.2s; }
         .city-card:hover { border-color: rgba(100,255,218,0.3); }
-        .city-name { font-size: 0.85rem; color: #888; margin-bottom: 8px; }
-        .city-temp { font-size: 2rem; font-weight: 700; margin-bottom: 5px; }
-        .city-condition { font-size: 0.75rem; color: #666; }
-        .city-detail { font-size: 0.7rem; color: #555; margin-top: 8px; }
-        
-        /* Charts Row */
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; }
-        .chart-card h4 { font-size: 0.85rem; color: #888; margin-bottom: 15px; font-weight: 500; }
-        .chart-container { height: 200px; position: relative; }
-        
+        .city-name { font-size: 0.8rem; color: #666; margin-bottom: 6px; }
+        .city-temp { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+        .city-condition { font-size: 0.7rem; color: #555; }
+        .city-detail { font-size: 0.65rem; color: #444; margin-top: 6px; }
+
+        /* Comparison Section */
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+        .chart-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; }
+        .chart-card h4 { font-size: 0.8rem; color: #666; margin-bottom: 12px; font-weight: 500; }
+        .chart-container { height: 180px; position: relative; }
+
+        /* Insights */
+        .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+        .insight-card { background: rgba(100,255,218,0.04); border: 1px solid rgba(100,255,218,0.15); border-radius: 8px; padding: 16px; }
+        .insight-card h5 { font-size: 0.75rem; color: #64ffda; margin-bottom: 6px; font-weight: 500; }
+        .insight-card p { font-size: 0.8rem; color: #888; line-height: 1.5; }
+
+        /* Pipeline Status */
+        .pipeline-status { display: flex; gap: 24px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 32px; }
+        .status-item { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #64ffda; }
+        .status-label { font-size: 0.75rem; color: #666; }
+        .status-value { font-size: 0.75rem; color: #fff; }
+
         /* Footer */
-        .footer { padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; color: #444; font-size: 0.8rem; }
+        .footer { padding: 16px 32px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; color: #333; font-size: 0.75rem; }
         .footer a { color: #64ffda; text-decoration: none; }
-        
+
         /* Leaflet */
-        .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 8px; border: 1px solid rgba(100,255,218,0.2); }
+        .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 6px; border: 1px solid rgba(100,255,218,0.2); }
         .leaflet-popup-tip { background: #1a1a2e; }
-        .popup-content { text-align: center; padding: 5px; }
-        .popup-city { font-weight: 600; margin-bottom: 5px; }
-        .popup-temp { font-size: 1.5rem; color: #64ffda; font-weight: 700; }
-        .popup-details { color: #888; font-size: 0.8rem; margin-top: 8px; }
-        .dark-tooltip { background: #1a1a2e !important; color: #fff !important; border: 1px solid #64ffda !important; border-radius: 4px !important; font-size: 0.8rem !important; }
+        .popup-content { text-align: center; padding: 4px; }
+        .popup-city { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .popup-temp { font-size: 1.3rem; color: #64ffda; font-weight: 700; }
+        .popup-details { color: #888; font-size: 0.75rem; margin-top: 6px; }
+        .dark-tooltip { background: #1a1a2e !important; color: #fff !important; border: 1px solid #64ffda !important; border-radius: 3px !important; font-size: 0.75rem !important; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1><span>PH</span> Weather Pipeline</h1>
         <div class="header-meta">
-            <div>Last updated: <span id="last-update">--</span></div>
-            <div>Refreshes every 30 min</div>
+            Last updated: <span id="last-update">--</span><br>
+            Auto-refresh every 30 min
         </div>
     </div>
-    
-    <div class="main">
-        <!-- Story Banner -->
-        <div class="story-banner">
-            <h2>Today's Weather Story</h2>
-            <p id="story-text">Loading weather insights...</p>
+
+    <div class="problem-section">
+        <div class="problem-label">Problem Statement</div>
+        <div class="problem-text">
+            Weather data across the <strong>Philippine archipelago varies significantly by region</strong>. 
+            No automated pipeline existed to collect, transform, and visualize real-time weather data 
+            for multiple cities in a <strong>structured, analytics-ready format</strong>.
         </div>
-        
-        <!-- KPIs -->
+    </div>
+
+    <div class="main">
+        <!-- Question 1: What is the current weather? -->
+        <div class="section-header">
+            <div class="section-num">1</div>
+            <div class="section-title">What is the weather right now across Philippine cities?</div>
+            <div class="section-answer" id="q1-answer">--</div>
+        </div>
+
         <div class="kpi-row">
             <div class="kpi">
                 <div class="kpi-label">Average Temperature</div>
@@ -109,39 +138,86 @@
                 <div class="kpi-sub">across all cities</div>
             </div>
         </div>
-        
-        <!-- Map -->
+
         <div class="map-container">
             <div class="map-header">
-                <h3>CITY OVERVIEW</h3>
+                <h3>Geographic Distribution</h3>
                 <div class="map-legend">
-                    <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div> 32°C+</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#feca57"></div> 30-31°C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#48dbfb"></div> 28-29°C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#64ffda"></div> Below 28°C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div> 32C+</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#feca57"></div> 30-31C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#48dbfb"></div> 28-29C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#64ffda"></div> Below 28C</div>
                 </div>
             </div>
             <div id="map"></div>
         </div>
-        
-        <!-- City Cards -->
+
         <div class="city-grid" id="city-grid"></div>
-        
-        <!-- Charts -->
-        <div class="charts-row">
+
+        <!-- Question 2: How do cities compare? -->
+        <div class="section-header">
+            <div class="section-num">2</div>
+            <div class="section-title">How do cities compare to each other?</div>
+            <div class="section-answer" id="q2-answer">--</div>
+        </div>
+
+        <div class="comparison-grid">
             <div class="chart-card">
-                <h4>TEMPERATURE BY CITY</h4>
+                <h4>Temperature Comparison</h4>
                 <div class="chart-container"><canvas id="tempChart"></canvas></div>
             </div>
             <div class="chart-card">
-                <h4>HUMIDITY DISTRIBUTION</h4>
+                <h4>Humidity Levels</h4>
                 <div class="chart-container"><canvas id="humidityChart"></canvas></div>
             </div>
         </div>
+
+        <!-- Question 3: What are the patterns? -->
+        <div class="section-header">
+            <div class="section-num">3</div>
+            <div class="section-title">What patterns and insights emerge from the data?</div>
+            <div class="section-answer" id="q3-answer">--</div>
+        </div>
+
+        <div class="insights-grid" id="insights-grid"></div>
+
+        <!-- Pipeline Status -->
+        <div class="section-header">
+            <div class="section-num">4</div>
+            <div class="section-title">Is the pipeline delivering fresh, reliable data?</div>
+        </div>
+
+        <div class="pipeline-status">
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <div class="status-label">Pipeline</div>
+                <div class="status-value">Active</div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <div class="status-label">Schedule</div>
+                <div class="status-value">Every 30 min</div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <div class="status-label">Cities</div>
+                <div class="status-value">5 tracked</div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <div class="status-label">API Budget</div>
+                <div class="status-value">48% utilized</div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <div class="status-label">Data Freshness</div>
+                <div class="status-value" id="freshness">--</div>
+            </div>
+        </div>
     </div>
-    
+
     <div class="footer">
-        <div>Built by <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank">Steve A. Villa</a> | Data: OpenWeatherMap API</div>
+        <div>Built by <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank">Steve A. Villa</a> | Data: OpenWeatherMap API | Stack: Airflow + PostgreSQL + dbt + Snowflake</div>
         <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
     </div>
 
@@ -161,25 +237,7 @@
             return '#64ffda';
         }
 
-        function generateStory() {
-            const temps = weatherData.map(d => d.temp);
-            const maxTemp = Math.max(...temps);
-            const minTemp = Math.min(...temps);
-            const hottest = weatherData.find(d => d.temp === maxTemp);
-            const coolest = weatherData.find(d => d.temp === minTemp);
-            const rainy = weatherData.filter(d => d.condition.includes('Rain'));
-            
-            let story = `It's a warm day across the Philippines. `;
-            story += `${hottest.city} leads at ${maxTemp}°C, while ${coolest.city} is the coolest at ${minTemp}°C. `;
-            if (rainy.length > 0) {
-                story += `Expect rain in ${rainy.map(d => d.city).join(' and ')}. `;
-            }
-            story += `Humidity is moderate across all cities.`;
-            
-            document.getElementById('story-text').textContent = story;
-        }
-
-        function updateKPIs() {
+        function updateAll() {
             const temps = weatherData.map(d => d.temp);
             const humidities = weatherData.map(d => d.humidity);
             const avgTemp = (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1);
@@ -188,53 +246,75 @@
             const minTemp = Math.min(...temps);
             const hottest = weatherData.find(d => d.temp === maxTemp);
             const coolest = weatherData.find(d => d.temp === minTemp);
+            const tempRange = maxTemp - minTemp;
 
-            document.getElementById('avg-temp').textContent = `${avgTemp}°C`;
-            document.getElementById('temp-range').textContent = `Range: ${minTemp}°C - ${maxTemp}°C`;
-            document.getElementById('max-temp').textContent = `${maxTemp}°C`;
+            // KPIs
+            document.getElementById('avg-temp').textContent = `${avgTemp}C`;
+            document.getElementById('temp-range').textContent = `Range: ${tempRange}C spread`;
+            document.getElementById('max-temp').textContent = `${maxTemp}C`;
             document.getElementById('max-city').textContent = hottest.city;
-            document.getElementById('min-temp').textContent = `${minTemp}°C`;
+            document.getElementById('min-temp').textContent = `${minTemp}C`;
             document.getElementById('min-city').textContent = coolest.city;
             document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }
+            document.getElementById('freshness').textContent = `Updated ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
 
-        function renderCityCards() {
-            const grid = document.getElementById('city-grid');
-            grid.innerHTML = weatherData.map(city => `
+            // Answers
+            document.getElementById('q1-answer').textContent = `${avgTemp}C average, ranging from ${minTemp}C to ${maxTemp}C`;
+            document.getElementById('q2-answer').textContent = `${hottest.city} is ${tempRange}C warmer than ${coolest.city}`;
+            document.getElementById('q3-answer').textContent = `${[...new Set(weatherData.map(d => d.condition))].length} different conditions across 5 cities`;
+
+            // City cards
+            document.getElementById('city-grid').innerHTML = weatherData.map(city => `
                 <div class="city-card">
                     <div class="city-name">${city.city}</div>
-                    <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}°C</div>
+                    <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}C</div>
                     <div class="city-condition">${city.condition}</div>
-                    <div class="city-detail">Feels ${city.feelsLike}°C | ${city.humidity}% | ${city.wind}km/h</div>
+                    <div class="city-detail">Feels ${city.feelsLike}C | ${city.humidity}% | ${city.wind}km/h</div>
                 </div>
             `).join('');
+
+            // Insights
+            const rainy = weatherData.filter(d => d.condition.includes('Rain'));
+            const sunny = weatherData.filter(d => d.condition.includes('Sunny') || d.condition === 'Clear');
+            const maxHumidity = Math.max(...humidities);
+            const mostHumid = weatherData.find(d => d.humidity === maxHumidity);
+
+            document.getElementById('insights-grid').innerHTML = `
+                <div class="insight-card">
+                    <h5>Regional Variation</h5>
+                    <p>Temperature varies by ${tempRange}C across the archipelago. ${hottest.city} in Luzon leads at ${maxTemp}C, while ${coolest.city} in Mindanao is coolest at ${minTemp}C.</p>
+                </div>
+                <div class="insight-card">
+                    <h5>Humidity Pattern</h5>
+                    <p>${mostHumid.city} has the highest humidity at ${maxHumidity}%. ${rainy.length > 0 ? `Rain is currently falling in ${rainy.map(d => d.city).join(' and ')}.` : 'All cities are currently dry.'}</p>
+                </div>
+                <div class="insight-card">
+                    <h5>Weather Diversity</h5>
+                    <p>${[...new Set(weatherData.map(d => d.condition))].join(', ')}. The archipelago's geography creates distinct microclimates across regions.</p>
+                </div>
+            `;
         }
 
         function initMap() {
             const map = L.map('map', { zoomControl: false }).setView([12.8797, 121.7740], 6);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: 'OpenStreetMap, CARTO',
-                maxZoom: 19
+                attribution: 'OpenStreetMap, CARTO', maxZoom: 19
             }).addTo(map);
 
             weatherData.forEach(city => {
                 const marker = L.circleMarker([city.lat, city.lon], {
-                    radius: 20, fillColor: getMarkerColor(city.temp), color: '#fff', weight: 2, fillOpacity: 0.9
+                    radius: 18, fillColor: getMarkerColor(city.temp), color: '#fff', weight: 2, fillOpacity: 0.9
                 }).addTo(map);
 
                 marker.bindPopup(`
                     <div class="popup-content">
                         <div class="popup-city">${city.city}</div>
-                        <div class="popup-temp">${city.temp}°C</div>
-                        <div class="popup-details">
-                            ${city.condition}<br>
-                            Feels like ${city.feelsLike}°C | ${city.humidity}% humidity
-                        </div>
+                        <div class="popup-temp">${city.temp}C</div>
+                        <div class="popup-details">${city.condition}<br>Feels ${city.feelsLike}C | ${city.humidity}% | ${city.wind}km/h</div>
                     </div>
                 `);
-
-                marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -15] });
+                marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -12] });
             });
         }
 
@@ -243,46 +323,22 @@
                 type: 'bar',
                 data: {
                     labels: weatherData.map(d => d.city),
-                    datasets: [{
-                        data: weatherData.map(d => d.temp),
-                        backgroundColor: weatherData.map(d => getMarkerColor(d.temp)),
-                        borderRadius: 6, barThickness: 30
-                    }]
+                    datasets: [{ data: weatherData.map(d => d.temp), backgroundColor: weatherData.map(d => getMarkerColor(d.temp)), borderRadius: 4, barThickness: 28 }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
-                        x: { grid: { display: false }, ticks: { color: '#666' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
             });
 
             new Chart(document.getElementById('humidityChart'), {
                 type: 'bar',
                 data: {
                     labels: weatherData.map(d => d.city),
-                    datasets: [{
-                        data: weatherData.map(d => d.humidity),
-                        backgroundColor: 'rgba(100, 255, 218, 0.6)',
-                        borderRadius: 6, barThickness: 30
-                    }]
+                    datasets: [{ data: weatherData.map(d => d.humidity), backgroundColor: 'rgba(100, 255, 218, 0.5)', borderRadius: 4, barThickness: 28 }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { min: 60, max: 90, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
-                        x: { grid: { display: false }, ticks: { color: '#666' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 60, max: 90, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
             });
         }
 
-        generateStory();
-        updateKPIs();
-        renderCityCards();
+        updateAll();
         initMap();
         initCharts();
     </script>
