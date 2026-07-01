@@ -1,0 +1,11 @@
+{
+  "cities": [
+    {"city_id": 1701668, "name": "Manila", "country": "PH", "lat": 14.5995, "lon": 120.9842, "tz_offset": 28800},
+    {"city_id": 1687110, "name": "Cebu City", "country": "PH", "lat": 10.3157, "lon": 123.8854, "tz_offset": 28800},
+    {"city_id": 711713, "name": "Davao City", "country": "PH", "lat": 7.1907, "lon": 125.4553, "tz_offset": 28800},
+    {"city_id": 1704068, "name": "Makati", "country": "PH", "lat": 14.5547, "lon": 121.0500, "tz_offset": 28800},
+    {"city_id": 1694282, "name": "Quezon City", "country": "PH", "lat": 14.6760, "lon": 121.0437, "tz_offset": 28800}
+  ],
+  "forecast_days": 5,
+  "units": "metric"
+}

@@ -1,0 +1,126 @@
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  env_file: .env
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: '81HqDtbqAywKSOumSha3BhWNOdQ26slT6K0YaZeZyPs='
+    OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
+    SNOWFLAKE_USER: ${SNOWFLAKE_USER}
+    SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+    SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
+    SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
+    SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+    PGHOST: postgres
+    PGPORT: '5432'
+    PGDATABASE: weather_staging
+    PGUSER: weather_user
+    PGPASSWORD: ${POSTGRES_PASSWORD:-weather_pass}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./include:/opt/airflow/include
+    - ./config:/opt/airflow/config
+    - ./scripts:/opt/airflow/scripts
+    - ./dbt:/opt/airflow/dbt
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    - weather-net
+
+services:
+  # --- PostgreSQL (Staging / Landing Zone) ---
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: weather_staging
+      POSTGRES_USER: weather_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-weather_pass}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weather_user -d weather_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weather-net
+
+  # --- Airflow Webserver ---
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - weather-net
+
+  # --- Airflow Scheduler ---
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    networks:
+      - weather-net
+
+  # --- Airflow Init (migrate + create admin) ---
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com
+    networks:
+      - weather-net
+
+  # --- dbt Runner ---
+  dbt-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt
+    environment:
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
+      SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      PGHOST: postgres
+      PGPORT: '5432'
+      PGDATABASE: weather_staging
+      PGUSER: weather_user
+      PGPASSWORD: ${POSTGRES_PASSWORD:-weather_pass}
+    volumes:
+      - ./dbt:/usr/src/dbt
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - weather-net
+
+volumes:
+  postgres_data:
+
+networks:
+  weather-net:

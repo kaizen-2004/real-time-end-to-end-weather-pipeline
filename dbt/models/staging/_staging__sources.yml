@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+    tables:
+      - name: weather_current
+        loaded_at_field: loaded_at
+        freshness:
+          warn_after: {count: 30, period: minute}
+          error_after: {count: 120, period: minute}
+      - name: weather_forecast
+        loaded_at_field: loaded_at
+        freshness:
+          warn_after: {count: 30, period: minute}
+          error_after: {count: 120, period: minute}
