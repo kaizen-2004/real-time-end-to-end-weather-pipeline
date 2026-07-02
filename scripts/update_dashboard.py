@@ -112,7 +112,7 @@ def generate_html(weather_data):
         .map-legend {{ display: flex; gap: 12px; font-size: 0.7rem; }}
         .legend-item {{ display: flex; align-items: center; gap: 4px; color: #666; }}
         .legend-dot {{ width: 8px; height: 8px; border-radius: 50%; }}
-        #map {{ aspect-ratio: 1 / 1; width: 100%; }}
+        #map {{ aspect-ratio: 2 / 1; width: 100%; max-height: 400px; }}
         .city-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 32px; }}
         .city-card {{ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.2s; }}
         .city-card:hover {{ border-color: rgba(100,255,218,0.3); }}
