@@ -1,50 +1,51 @@
 # Philippine Weather Pipeline
 
-End-to-end ELT data pipeline that tracks real-time weather across 5 Philippine cities using Apache Airflow, PostgreSQL, dbt, and Snowflake.
+End-to-end ELT data pipeline that tracks real-time weather across 5 Philippine cities using Apache Airflow, PostgreSQL, dbt, and Snowflake. Live dashboard auto-refreshes every 30 minutes with data from OpenWeatherMap API.
 
-[Live Dashboard](https://kaizen-2004.github.io/real-time-end-to-end-weather-pipeline/) | [Snowflake Query](https://app.snowflake.com) | [Author](https://steve-villa-devportfolio.netlify.app/)
+[Live Dashboard](https://kaizen-2004.github.io/real-time-end-to-end-weather-pipeline/) | [Author](https://steve-villa-devportfolio.netlify.app/)
 
 ---
 
-## Overview
+## Problem Statement
 
-This project demonstrates a production-grade data pipeline following the ELT pattern (Extract, Load, Transform). Weather data is extracted from the OpenWeatherMap API every 30 minutes, staged in PostgreSQL, transformed with dbt, and loaded into Snowflake as a star schema optimized for analytics.
+Weather data across the Philippine archipelago varies significantly by region. No automated pipeline existed to collect, transform, and visualize real-time weather data for multiple cities in a structured, analytics-ready format.
 
-### Key Features
+## Solution
 
-- **Automated ingestion** — Apache Airflow orchestrates the pipeline on a 30-minute schedule
-- **ELT pattern** — Raw data lands first, transformations happen in the warehouse
-- **Star schema** — Dimensional modeling with dim_cities, dim_dates, and fact tables
-- **Rate limiting** — Respects OpenWeatherMap's 1,000 calls/day free tier
-- **Containerized** — Full stack runs locally with Docker Compose
-- **Live dashboard** — Interactive geospatial visualization with Chart.js and Leaflet
+Built an end-to-end ELT pipeline that:
+- Extracts weather data from OpenWeatherMap API for 5 cities
+- Stages raw JSON in PostgreSQL
+- Transforms with dbt into a star schema
+- Loads into Snowflake for analytics
+- Visualizes on an interactive geospatial dashboard
 
 ---
 
 ## Architecture
 
 ```
-OpenWeatherMap API
-        |
-        v
-   [Airflow DAG]  --- extracts every 30 min
-        |
-        v
-  PostgreSQL (raw)  --- JSONB landing zone
-        |
-        v
-    dbt models  --- staging -> intermediate -> marts
-        |
-        v
-  Snowflake (marts)  --- star schema for analytics
+OpenWeatherMap API ──→ GitHub Actions (every 30 min) ──→ Live Dashboard
+                          │
+                          ▼
+                    Airflow DAG ──→ PostgreSQL (raw) ──→ dbt ──→ Snowflake
+                                                               │
+                                                               ▼
+                                                         Star Schema
+                                                    (dim_cities, dim_dates,
+                                                     fct_weather_readings,
+                                                     fct_daily_weather)
 ```
 
 ### Data Flow
 
-1. **Extract** — `weather_api.py` calls `/weather` and `/forecast` for 5 cities
-2. **Load** — Raw JSON lands in PostgreSQL `raw` schema as JSONB
-3. **Transform** — dbt flattens JSON, aggregates data, builds star schema
-4. **Serve** — Snowflake tables power the dashboard and ad-hoc queries
+| Step | Component | Action | Output |
+|------|-----------|--------|--------|
+| 1 | OpenWeatherMap API | GET `/weather` for 5 cities | JSON responses |
+| 2 | Airflow DAG | Triggers every 30 min | Pipeline execution |
+| 3 | PostgreSQL | Stores raw JSONB | `raw.weather_current` |
+| 4 | dbt staging | Flattens JSON into typed columns | `staging.stg_weather__current` |
+| 5 | dbt marts | Star schema dimensions + facts | `marts.dim_cities`, `fct_weather_readings` |
+| 6 | Dashboard | Fetches live API data | Interactive geospatial visualization |
 
 ---
 
@@ -53,24 +54,25 @@ OpenWeatherMap API
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Orchestration | Apache Airflow 2.9 | Schedule and monitor pipeline |
-| Staging | PostgreSQL 16 | Raw data landing zone |
+| Staging | PostgreSQL 16 | Raw data landing zone (JSONB) |
 | Transformation | dbt 1.7 | SQL-based ELT models |
 | Warehouse | Snowflake | Analytics-ready star schema |
 | Containerization | Docker Compose | Reproducible local environment |
 | API | OpenWeatherMap | Weather data source |
-| Dashboard | Chart.js + Leaflet | Interactive visualization |
+| Dashboard | Chart.js + Leaflet | Interactive geospatial visualization |
+| Automation | GitHub Actions | Auto-refresh dashboard every 30 min |
 
 ---
 
 ## Cities Tracked
 
-| City | Coordinates |
-|------|-------------|
-| Manila | 14.5995°N, 120.9842°E |
-| Cebu City | 10.3157°N, 123.8854°E |
-| Davao City | 7.1907°N, 125.4553°E |
-| Makati | 14.5547°N, 121.0500°E |
-| Quezon City | 14.6760°N, 121.0437°E |
+| City | Coordinates | Region |
+|------|-------------|--------|
+| Manila | 14.5995°N, 120.9842°E | Luzon |
+| Cebu City | 10.3157°N, 123.8854°E | Visayas |
+| Davao City | 7.1907°N, 125.4553°E | Mindanao |
+| Makati | 14.5547°N, 121.0500°E | Luzon |
+| Quezon City | 14.6760°N, 121.0437°E | Luzon |
 
 ---
 
@@ -91,7 +93,7 @@ cd real-time-end-to-end-weather-pipeline
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env with your Snowflake and OpenWeatherMap credentials
+# Edit .env with your credentials
 
 # Start all services
 docker compose up -d
@@ -100,6 +102,16 @@ docker compose up -d
 docker compose exec airflow-scheduler python /opt/airflow/scripts/seed_snowflake.py
 ```
 
+### Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `OPENWEATHER_API_KEY` | OpenWeatherMap API key | `abc123def456` |
+| `AIRFLOW_FERNET_KEY` | Airflow encryption key | Generate with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
+| `SNOWFLAKE_ACCOUNT` | Snowflake account identifier | `abc12345.us-east-1` |
+| `SNOWFLAKE_USER` | Snowflake username | `your_username` |
+| `SNOWFLAKE_PASSWORD` | Snowflake password | `your_password` |
+
 ### Access Services
 
 | Service | URL | Credentials |
@@ -107,6 +119,7 @@ docker compose exec airflow-scheduler python /opt/airflow/scripts/seed_snowflake
 | Airflow UI | http://localhost:8080 | admin / admin |
 | PostgreSQL | localhost:5433 | weather_user / weather_pass |
 | Snowflake | https://app.snowflake.com | Your account |
+| Live Dashboard | https://kaizen-2004.github.io/real-time-end-to-end-weather-pipeline/ | Public |
 
 ---
 
@@ -163,28 +176,53 @@ ORDER BY c.city_name, d.date_key;
 
 ---
 
+## Dashboard Auto-Refresh
+
+The live dashboard is automatically updated every 30 minutes via GitHub Actions:
+
+1. **GitHub Actions workflow** runs `scripts/update_dashboard.py`
+2. Script fetches live data from OpenWeatherMap API
+3. Generates new `index.html` with real-time data
+4. Commits and pushes to the repository
+5. GitHub Pages serves the updated dashboard
+
+### Setting Up Auto-Refresh
+
+1. Add your OpenWeatherMap API key as a GitHub repository secret:
+   - Go to Settings → Secrets and variables → Actions
+   - Add `OPENWEATHER_API_KEY` with your API key
+
+2. The workflow runs automatically every 30 minutes, or trigger manually:
+   - Go to Actions → Update Dashboard → Run workflow
+
+---
+
 ## Project Structure
 
 ```
 weather-pipeline/
-├── dags/                    # Airflow DAG definitions
-├── include/                 # Shared Python modules
-│   ├── extract/             # API client, rate limiter
-│   └── load/                # PostgreSQL loader
-├── dbt/                     # dbt project
+├── .github/workflows/         # GitHub Actions workflows
+│   └── update-dashboard.yml   # Auto-refresh dashboard
+├── dags/                      # Airflow DAG definitions
+├── include/                   # Shared Python modules
+│   ├── extract/               # API client, rate limiter
+│   └── load/                  # PostgreSQL loader
+├── dbt/                       # dbt project
 │   ├── models/
-│   │   ├── staging/         # Flatten raw JSON
-│   │   ├── intermediate/    # Aggregations
-│   │   └── marts/           # Star schema
-│   └── seeds/               # Reference data (cities)
-├── sql/                     # Database init scripts
+│   │   ├── staging/           # Flatten raw JSON
+│   │   ├── intermediate/      # Aggregations
+│   │   └── marts/             # Star schema
+│   └── seeds/                 # Reference data (cities)
+├── sql/                       # Database init scripts
 │   ├── postgres/
 │   └── snowflake/
-├── scripts/                 # Setup utilities
-├── tests/                   # Unit tests
-├── dashboard/               # Interactive dashboard
-├── docker-compose.yml       # Service orchestration
-└── .env.example             # Environment template
+├── scripts/
+│   ├── update_dashboard.py    # Fetch live data, generate HTML
+│   └── seed_snowflake.py      # Initialize Snowflake schemas
+├── tests/                     # Unit tests
+├── docker-compose.yml         # Service orchestration
+├── .env.example               # Environment template
+└── README.md                  # This file
 ```
 
 ---
@@ -194,22 +232,22 @@ weather-pipeline/
 ### Snowflake Star Schema
 
 ```
-dim_cities                dim_dates
-├── city_id (PK)          ├── date_key (PK)
-├── city_name             ├── full_date
-├── country_code          ├── year, month, day
-├── latitude              ├── day_of_week
-├── longitude             └── is_weekend
+dim_cities                    dim_dates
+├── city_id (PK)              ├── date_key (PK)
+├── city_name                 ├── full_date
+├── country_code              ├── year, month, day
+├── latitude                  ├── day_of_week
+├── longitude                 └── is_weekend
 └── timezone_offset
 
-fct_weather_readings      fct_daily_weather
-├── reading_id (PK)       ├── city_id (FK)
-├── city_id (FK)          ├── date_key (FK)
-├── date_key (FK)         ├── avg_temperature_k
-├── temperature_k         ├── min_temperature_k
-├── temperature_f         ├── max_temperature_k
-├── humidity_pct          ├── avg_humidity_pct
-├── weather_condition     └── dominant_condition
+fct_weather_readings          fct_daily_weather
+├── reading_id (PK)           ├── city_id (FK)
+├── city_id (FK)              ├── date_key (FK)
+├── date_key (FK)             ├── avg_temperature_k
+├── temperature_k             ├── min_temperature_k
+├── temperature_f             ├── max_temperature_k
+├── humidity_pct              ├── avg_humidity_pct
+├── weather_condition         └── dominant_condition
 └── reading_timestamp
 ```
 
@@ -220,8 +258,8 @@ fct_weather_readings      fct_daily_weather
 | Metric | Value |
 |--------|-------|
 | OpenWeatherMap free tier | 1,000 calls/day |
-| Pipeline per run | 10 calls (5 cities x 2 endpoints) |
-| Daily usage (30-min intervals) | ~480 calls (48% of budget) |
+| Pipeline per run | 5 calls (5 cities × 1 endpoint) |
+| Daily usage (30-min intervals) | 240 calls (24% of budget) |
 | Rate limiter | Max 60 calls/minute with backoff |
 
 ---
@@ -256,6 +294,25 @@ docker compose down
 # Remove volumes (fresh start)
 docker compose down -v
 ```
+
+---
+
+## Troubleshooting
+
+### Dashboard shows old data
+- Check GitHub Actions status: https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline/actions
+- Ensure `OPENWEATHER_API_KEY` secret is set in repository settings
+- Trigger workflow manually to test
+
+### Airflow DAG fails
+- Check Airflow UI: http://localhost:8080
+- View task logs in the UI
+- Ensure `.env` has correct credentials
+
+### Snowflake connection fails
+- Verify Snowflake account, user, and password in `.env`
+- Check Snowflake is running and accessible
+- Run `docker compose exec airflow-scheduler python /opt/airflow/scripts/seed_snowflake.py`
 
 ---
 
