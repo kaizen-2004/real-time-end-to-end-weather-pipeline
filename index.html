@@ -34,7 +34,7 @@
         .map-legend { display: flex; gap: 12px; font-size: 0.7rem; }
         .legend-item { display: flex; align-items: center; gap: 4px; color: #666; }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-        #map { aspect-ratio: 1 / 1; width: 100%; }
+        #map { aspect-ratio: 2 / 1; width: 100%; max-height: 400px; }
         .city-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 32px; }
         .city-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.2s; }
         .city-card:hover { border-color: rgba(100,255,218,0.3); }
@@ -70,7 +70,7 @@
     <div class="header">
         <h1><span>PH</span> Weather Pipeline</h1>
         <div class="header-meta">
-            Last updated: 10:39 AM<br>
+            Last updated: 10:42 AM<br>
             Auto-refresh every 30 min
         </div>
     </div>
@@ -201,7 +201,7 @@
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">10:39 AM</div></div>
+            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">10:42 AM</div></div>
         </div>
     </div>
     <div class="footer">
