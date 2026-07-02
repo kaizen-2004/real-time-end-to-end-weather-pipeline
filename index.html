@@ -9,37 +9,31 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; }
+        html, body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; overflow-x: hidden; width: 100%; }
 
-        /* Header */
-        .header { padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .header { padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 8px; }
         .header h1 { font-size: 1.2rem; font-weight: 600; color: #fff; }
         .header h1 span { color: #64ffda; }
-        .header-meta { text-align: right; color: #555; font-size: 0.8rem; line-height: 1.6; }
+        .header-meta { text-align: right; color: #555; font-size: 0.8rem; }
 
-        /* Problem Statement */
         .problem-section { padding: 24px 32px; background: rgba(100,255,218,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
         .problem-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64ffda; margin-bottom: 8px; }
         .problem-text { font-size: 1rem; color: #b0b0b0; line-height: 1.6; max-width: 900px; }
         .problem-text strong { color: #fff; }
 
-        /* Main */
-        .main { padding: 24px 32px; }
+        .main { padding: 24px 32px; overflow: hidden; }
 
-        /* Section Headers */
-        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        .section-num { background: #64ffda; color: #0a0a1a; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .section-num { background: #64ffda; color: #0a0a1a; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
         .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
-        .section-answer { font-size: 0.9rem; color: #64ffda; margin-left: auto; }
+        .section-answer { font-size: 0.9rem; color: #64ffda; margin-left: auto; white-space: nowrap; }
 
-        /* KPI Row */
-        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
         .kpi { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; }
         .kpi-label { color: #555; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 4px; }
+        .kpi-value { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 4px; }
         .kpi-sub { color: #64ffda; font-size: 0.75rem; margin-top: 4px; }
 
-        /* Map */
         .map-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin-bottom: 32px; }
         .map-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
         .map-header h3 { font-size: 0.85rem; color: #fff; font-weight: 500; }
@@ -48,8 +42,7 @@
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
         #map { height: 320px; }
 
-        /* City Cards */
-        .city-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 32px; }
+        .city-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 32px; }
         .city-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.2s; }
         .city-card:hover { border-color: rgba(100,255,218,0.3); }
         .city-name { font-size: 0.8rem; color: #666; margin-bottom: 6px; }
@@ -57,30 +50,25 @@
         .city-condition { font-size: 0.7rem; color: #555; }
         .city-detail { font-size: 0.65rem; color: #444; margin-top: 6px; }
 
-        /* Comparison Section */
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
-        .chart-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 32px; }
+        .chart-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 16px; min-width: 0; }
         .chart-card h4 { font-size: 0.8rem; color: #666; margin-bottom: 12px; font-weight: 500; }
-        .chart-container { height: 180px; position: relative; }
+        .chart-container { height: 220px; position: relative; width: 100%; }
 
-        /* Insights */
-        .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 32px; }
         .insight-card { background: rgba(100,255,218,0.04); border: 1px solid rgba(100,255,218,0.15); border-radius: 8px; padding: 16px; }
         .insight-card h5 { font-size: 0.75rem; color: #64ffda; margin-bottom: 6px; font-weight: 500; }
         .insight-card p { font-size: 0.8rem; color: #888; line-height: 1.5; }
 
-        /* Pipeline Status */
-        .pipeline-status { display: flex; gap: 24px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 32px; }
+        .pipeline-status { display: flex; gap: 24px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 32px; flex-wrap: wrap; }
         .status-item { display: flex; align-items: center; gap: 8px; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #64ffda; }
         .status-label { font-size: 0.75rem; color: #666; }
         .status-value { font-size: 0.75rem; color: #fff; }
 
-        /* Footer */
-        .footer { padding: 16px 32px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; color: #333; font-size: 0.75rem; }
+        .footer { padding: 16px 32px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; color: #333; font-size: 0.75rem; flex-wrap: wrap; gap: 8px; }
         .footer a { color: #64ffda; text-decoration: none; }
 
-        /* Leaflet */
         .leaflet-popup-content-wrapper { background: #1a1a2e; color: #fff; border-radius: 6px; border: 1px solid rgba(100,255,218,0.2); }
         .leaflet-popup-tip { background: #1a1a2e; }
         .popup-content { text-align: center; padding: 4px; }
@@ -94,7 +82,7 @@
     <div class="header">
         <h1><span>PH</span> Weather Pipeline</h1>
         <div class="header-meta">
-            Last updated: <span id="last-update">--</span><br>
+            Last updated: 02:18 AM<br>
             Auto-refresh every 30 min
         </div>
     </div>
@@ -109,32 +97,31 @@
     </div>
 
     <div class="main">
-        <!-- Question 1: What is the current weather? -->
         <div class="section-header">
             <div class="section-num">1</div>
             <div class="section-title">What is the weather right now across Philippine cities?</div>
-            <div class="section-answer" id="q1-answer">--</div>
+            <div class="section-answer">30.6C average, ranging from 28C to 32C</div>
         </div>
 
         <div class="kpi-row">
             <div class="kpi">
                 <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-value" id="avg-temp">--</div>
-                <div class="kpi-sub" id="temp-range">--</div>
+                <div class="kpi-value">30.6C</div>
+                <div class="kpi-sub">Range: 4C spread</div>
             </div>
             <div class="kpi">
                 <div class="kpi-label">Hottest City</div>
-                <div class="kpi-value" id="max-temp">--</div>
-                <div class="kpi-sub" id="max-city">--</div>
+                <div class="kpi-value">32C</div>
+                <div class="kpi-sub">Manila</div>
             </div>
             <div class="kpi">
                 <div class="kpi-label">Coolest City</div>
-                <div class="kpi-value" id="min-temp">--</div>
-                <div class="kpi-sub" id="min-city">--</div>
+                <div class="kpi-value">28C</div>
+                <div class="kpi-sub">Davao City</div>
             </div>
             <div class="kpi">
                 <div class="kpi-label">Avg Humidity</div>
-                <div class="kpi-value" id="avg-humidity">--</div>
+                <div class="kpi-value">74%</div>
                 <div class="kpi-sub">across all cities</div>
             </div>
         </div>
@@ -154,14 +141,13 @@
 
         <div class="city-grid" id="city-grid"></div>
 
-        <!-- Question 2: How do cities compare? -->
         <div class="section-header">
             <div class="section-num">2</div>
             <div class="section-title">How do cities compare to each other?</div>
-            <div class="section-answer" id="q2-answer">--</div>
+            <div class="section-answer">Manila is 4C warmer than Davao City</div>
         </div>
 
-        <div class="comparison-grid">
+        <div class="charts-grid">
             <div class="chart-card">
                 <h4>Temperature Comparison</h4>
                 <div class="chart-container"><canvas id="tempChart"></canvas></div>
@@ -172,16 +158,31 @@
             </div>
         </div>
 
-        <!-- Question 3: What are the patterns? -->
         <div class="section-header">
             <div class="section-num">3</div>
             <div class="section-title">What patterns and insights emerge from the data?</div>
-            <div class="section-answer" id="q3-answer">--</div>
+            <div class="section-answer">1 different conditions across 5 cities</div>
         </div>
 
-        <div class="insights-grid" id="insights-grid"></div>
+        <div class="insights-grid">
+            <div class="insight-card">
+                <h5>Regional Variation</h5>
+                <p>Temperature varies by 4C across the archipelago. Manila leads at 32C, while Davao City is coolest at 28C.</p>
+            </div>
+            <div class="insight-card">
+                <h5>Humidity Pattern</h5>
+                <p>Cebu City has the highest humidity at 81%. All cities are currently dry.</p>
+            </div>
+            <div class="insight-card">
+                <h5>Weather Diversity</h5>
+                <p>Clouds. The archipelago's geography creates distinct microclimates across regions.</p>
+            </div>
+            <div class="insight-card">
+                <h5>Live Data</h5>
+                <p>Data sourced from OpenWeatherMap API and refreshed every 30 minutes via GitHub Actions.</p>
+            </div>
+        </div>
 
-        <!-- Pipeline Status -->
         <div class="section-header">
             <div class="section-num">4</div>
             <div class="section-title">Is the pipeline delivering fresh, reliable data?</div>
@@ -205,13 +206,13 @@
             </div>
             <div class="status-item">
                 <div class="status-dot"></div>
-                <div class="status-label">API Budget</div>
-                <div class="status-value">48% utilized</div>
+                <div class="status-label">Data Source</div>
+                <div class="status-value">OpenWeatherMap API</div>
             </div>
             <div class="status-item">
                 <div class="status-dot"></div>
-                <div class="status-label">Data Freshness</div>
-                <div class="status-value" id="freshness">--</div>
+                <div class="status-label">Last Updated</div>
+                <div class="status-value">02:18 AM</div>
             </div>
         </div>
     </div>
@@ -222,78 +223,13 @@
     </div>
 
     <script>
-        const weatherData = [
-            { city: "Manila", temp: 31, humidity: 75, condition: "Partly Cloudy", lat: 14.5995, lon: 120.9842, feelsLike: 34, wind: 12 },
-            { city: "Cebu City", temp: 29, humidity: 80, condition: "Sunny", lat: 10.3157, lon: 123.8854, feelsLike: 32, wind: 8 },
-            { city: "Davao City", temp: 28, humidity: 82, condition: "Light Rain", lat: 7.1907, lon: 125.4553, feelsLike: 30, wind: 15 },
-            { city: "Makati", temp: 30, humidity: 76, condition: "Cloudy", lat: 14.5547, lon: 121.0500, feelsLike: 33, wind: 10 },
-            { city: "Quezon City", temp: 29, humidity: 78, condition: "Clear", lat: 14.6760, lon: 121.0437, feelsLike: 31, wind: 9 }
-        ];
+        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 32, "feels_like": 39, "humidity": 69, "wind": 13, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 29, "feels_like": 34, "humidity": 81, "wind": 8, "condition": "Clouds", "description": "Broken Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 28, "feels_like": 32, "humidity": 78, "wind": 5, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 32, "feels_like": 39, "humidity": 70, "wind": 14, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 32, "feels_like": 39, "humidity": 71, "wind": 14, "condition": "Clouds", "description": "Overcast Clouds"}];
 
         function getMarkerColor(temp) {
             if (temp >= 32) return '#ff6b6b';
             if (temp >= 30) return '#feca57';
             if (temp >= 28) return '#48dbfb';
             return '#64ffda';
-        }
-
-        function updateAll() {
-            const temps = weatherData.map(d => d.temp);
-            const humidities = weatherData.map(d => d.humidity);
-            const avgTemp = (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1);
-            const avgHumidity = (humidities.reduce((a, b) => a + b, 0) / humidities.length).toFixed(0);
-            const maxTemp = Math.max(...temps);
-            const minTemp = Math.min(...temps);
-            const hottest = weatherData.find(d => d.temp === maxTemp);
-            const coolest = weatherData.find(d => d.temp === minTemp);
-            const tempRange = maxTemp - minTemp;
-
-            // KPIs
-            document.getElementById('avg-temp').textContent = `${avgTemp}C`;
-            document.getElementById('temp-range').textContent = `Range: ${tempRange}C spread`;
-            document.getElementById('max-temp').textContent = `${maxTemp}C`;
-            document.getElementById('max-city').textContent = hottest.city;
-            document.getElementById('min-temp').textContent = `${minTemp}C`;
-            document.getElementById('min-city').textContent = coolest.city;
-            document.getElementById('avg-humidity').textContent = `${avgHumidity}%`;
-            document.getElementById('last-update').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('freshness').textContent = `Updated ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-
-            // Answers
-            document.getElementById('q1-answer').textContent = `${avgTemp}C average, ranging from ${minTemp}C to ${maxTemp}C`;
-            document.getElementById('q2-answer').textContent = `${hottest.city} is ${tempRange}C warmer than ${coolest.city}`;
-            document.getElementById('q3-answer').textContent = `${[...new Set(weatherData.map(d => d.condition))].length} different conditions across 5 cities`;
-
-            // City cards
-            document.getElementById('city-grid').innerHTML = weatherData.map(city => `
-                <div class="city-card">
-                    <div class="city-name">${city.city}</div>
-                    <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}C</div>
-                    <div class="city-condition">${city.condition}</div>
-                    <div class="city-detail">Feels ${city.feelsLike}C | ${city.humidity}% | ${city.wind}km/h</div>
-                </div>
-            `).join('');
-
-            // Insights
-            const rainy = weatherData.filter(d => d.condition.includes('Rain'));
-            const sunny = weatherData.filter(d => d.condition.includes('Sunny') || d.condition === 'Clear');
-            const maxHumidity = Math.max(...humidities);
-            const mostHumid = weatherData.find(d => d.humidity === maxHumidity);
-
-            document.getElementById('insights-grid').innerHTML = `
-                <div class="insight-card">
-                    <h5>Regional Variation</h5>
-                    <p>Temperature varies by ${tempRange}C across the archipelago. ${hottest.city} in Luzon leads at ${maxTemp}C, while ${coolest.city} in Mindanao is coolest at ${minTemp}C.</p>
-                </div>
-                <div class="insight-card">
-                    <h5>Humidity Pattern</h5>
-                    <p>${mostHumid.city} has the highest humidity at ${maxHumidity}%. ${rainy.length > 0 ? `Rain is currently falling in ${rainy.map(d => d.city).join(' and ')}.` : 'All cities are currently dry.'}</p>
-                </div>
-                <div class="insight-card">
-                    <h5>Weather Diversity</h5>
-                    <p>${[...new Set(weatherData.map(d => d.condition))].join(', ')}. The archipelago's geography creates distinct microclimates across regions.</p>
-                </div>
-            `;
         }
 
         function initMap() {
@@ -309,13 +245,24 @@
 
                 marker.bindPopup(`
                     <div class="popup-content">
-                        <div class="popup-city">${city.city}</div>
-                        <div class="popup-temp">${city.temp}C</div>
-                        <div class="popup-details">${city.condition}<br>Feels ${city.feelsLike}C | ${city.humidity}% | ${city.wind}km/h</div>
+                        <div class="popup-city>${city.city}</div>
+                        <div class="popup-temp>${city.temp}C</div>
+                        <div class="popup-details>${city.description}<br>Feels ${city.feels_like}C | ${city.humidity}% | ${city.wind}km/h</div>
                     </div>
                 `);
                 marker.bindTooltip(city.city, { permanent: true, className: 'dark-tooltip', direction: 'top', offset: [0, -12] });
             });
+        }
+
+        function renderCityCards() {
+            document.getElementById('city-grid').innerHTML = weatherData.map(city => `
+                <div class="city-card">
+                    <div class="city-name>${city.city}</div>
+                    <div class="city-temp" style="color: ${getMarkerColor(city.temp)}">${city.temp}C</div>
+                    <div class="city-condition>${city.description}</div>
+                    <div class="city-detail>Feels ${city.feels_like}C | ${city.humidity}% | ${city.wind}km/h</div>
+                </div>
+            `).join('');
         }
 
         function initCharts() {
@@ -325,7 +272,7 @@
                     labels: weatherData.map(d => d.city),
                     datasets: [{ data: weatherData.map(d => d.temp), backgroundColor: weatherData.map(d => getMarkerColor(d.temp)), borderRadius: 4, barThickness: 28 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 25, max: 35, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 20, max: 40, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
             });
 
             new Chart(document.getElementById('humidityChart'), {
@@ -334,11 +281,11 @@
                     labels: weatherData.map(d => d.city),
                     datasets: [{ data: weatherData.map(d => d.humidity), backgroundColor: 'rgba(100, 255, 218, 0.5)', borderRadius: 4, barThickness: 28 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 60, max: 90, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 50, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555' } }, x: { grid: { display: false }, ticks: { color: '#555' } } } }
             });
         }
 
-        updateAll();
+        renderCityCards();
         initMap();
         initCharts();
     </script>
