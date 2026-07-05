@@ -8,69 +8,224 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #1d1d1f;
+            --card: #ffffff;
+            --card-fg: #1d1d1f;
+            --primary: #0071e3;
+            --primary-fg: #ffffff;
+            --secondary: #f5f5f7;
+            --secondary-fg: #1d1d1f;
+            --muted: #f5f5f7;
+            --muted-fg: #6e6e73;
+            --border: rgba(0, 0, 0, 0.08);
+            --success: #34c759;
+            --error: #ff3b30;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1d1d1f;
+                --fg: #f5f5f7;
+                --card: #2c2c2e;
+                --card-fg: #f5f5f7;
+                --primary: #2997ff;
+                --primary-fg: #ffffff;
+                --secondary: #3a3a3c;
+                --secondary-fg: #f5f5f7;
+                --muted: #3a3a3c;
+                --muted-fg: #aeaeb2;
+                --border: rgba(255, 255, 255, 0.1);
+                --success: #30d158;
+                --error: #ff453a;
+            }
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; overflow-x: hidden; width: 100%; line-height: 1.5; }
-        .header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 8px; background: #ffffff; }
-        .header h1 { font-size: 1.1rem; font-weight: 600; color: #1e293b; letter-spacing: -0.01em; }
-        .header h1 span { color: #3b82f6; }
-        .header-meta { text-align: right; color: #64748b; font-size: 0.8rem; }
-        .problem-section { padding: 24px 40px; background: #ffffff; border-bottom: 1px solid #e2e8f0; }
-        .problem-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #3b82f6; margin-bottom: 8px; font-weight: 500; }
-        .problem-text { font-size: 0.95rem; color: #64748b; line-height: 1.7; max-width: 900px; }
-        .problem-text strong { color: #1e293b; font-weight: 600; }
-        .main { padding: 32px 40px; overflow: hidden; }
-        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .section-num { background: #3b82f6; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
-        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 500; }
-        .section-answer { font-size: 0.85rem; color: #3b82f6; margin-left: auto; white-space: nowrap; font-weight: 500; }
-        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 40px; }
-        .kpi { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
-        .kpi-label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
-        .kpi-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 6px; }
-        .kpi-sub { color: #3b82f6; font-size: 0.75rem; margin-top: 4px; font-weight: 500; }
-        .map-container { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 40px; }
-        .map-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .map-header h3 { font-size: 0.85rem; color: #1e293b; font-weight: 600; }
-        .map-legend { display: flex; gap: 16px; font-size: 0.7rem; }
-        .legend-item { display: flex; align-items: center; gap: 6px; color: #64748b; }
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        .header {
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .header h1 { font-size: 1.2rem; font-weight: 600; color: var(--fg); }
+        .header-meta { text-align: right; color: var(--muted-fg); font-size: 0.8rem; }
+        .problem-section {
+            padding: 24px 32px;
+            background: var(--secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        .problem-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .problem-text { font-size: 1rem; color: var(--muted-fg); line-height: 1.6; max-width: 900px; }
+        .problem-text strong { color: var(--fg); }
+        .main { padding: 24px 32px; overflow: hidden; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .section-num {
+            background: var(--primary);
+            color: var(--primary-fg);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted-fg); }
+        .section-answer { font-size: 0.9rem; color: var(--primary); margin-left: auto; white-space: nowrap; }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .kpi {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .kpi-label { color: var(--muted-fg); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--fg); margin-top: 4px; }
+        .kpi-sub { color: var(--primary); font-size: 0.75rem; margin-top: 4px; }
+        .map-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+        .map-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .map-header h3 { font-size: 0.85rem; color: var(--fg); font-weight: 500; }
+        .map-legend { display: flex; gap: 12px; font-size: 0.7rem; }
+        .legend-item { display: flex; align-items: center; gap: 4px; color: var(--muted-fg); }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
         #map { aspect-ratio: 2 / 1; width: 100%; max-height: 400px; }
-        .city-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 40px; }
-        .city-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; text-align: center; transition: border-color 0.15s ease; }
-        .city-card:hover { border-color: #3b82f6; }
-        .city-name { font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 500; }
-        .city-temp { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; color: #1e293b; }
-        .city-condition { font-size: 0.7rem; color: #64748b; }
-        .city-detail { font-size: 0.65rem; color: #94a3b8; margin-top: 6px; }
-        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 40px; }
-        .chart-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; min-width: 0; }
-        .chart-card h4 { font-size: 0.8rem; color: #64748b; margin-bottom: 16px; font-weight: 500; }
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+        .city-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: border-color 150ms ease;
+        }
+        .city-card:hover { border-color: var(--primary); }
+        .city-name { font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 6px; }
+        .city-temp { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+        .city-condition { font-size: 0.7rem; color: var(--muted-fg); }
+        .city-detail { font-size: 0.65rem; color: var(--muted-fg); margin-top: 6px; }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .chart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 0;
+        }
+        .chart-card h4 { font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 12px; font-weight: 500; }
         .chart-container { height: 220px; position: relative; width: 100%; }
-        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px; }
-        .insight-card { background: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 20px; }
-        .insight-card h5 { font-size: 0.75rem; color: #1d4ed8; margin-bottom: 8px; font-weight: 600; }
-        .insight-card p { font-size: 0.8rem; color: #64748b; line-height: 1.6; }
-        .pipeline-status { display: flex; gap: 24px; padding: 16px 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 40px; flex-wrap: wrap; }
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .insight-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .insight-card h5 { font-size: 0.75rem; color: var(--primary); margin-bottom: 6px; font-weight: 500; }
+        .insight-card p { font-size: 0.8rem; color: var(--muted-fg); line-height: 1.5; }
+        .pipeline-status {
+            display: flex;
+            gap: 24px;
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
         .status-item { display: flex; align-items: center; gap: 8px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
-        .status-label { font-size: 0.75rem; color: #64748b; }
-        .status-value { font-size: 0.75rem; color: #1e293b; font-weight: 500; }
-        .footer { padding: 20px 40px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 0.75rem; flex-wrap: wrap; gap: 8px; background: #ffffff; }
-        .footer a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+        .status-label { font-size: 0.75rem; color: var(--muted-fg); }
+        .status-value { font-size: 0.75rem; color: var(--fg); }
+        .footer {
+            padding: 16px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted-fg);
+            font-size: 0.75rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .footer a { color: var(--primary); text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
-        .leaflet-popup-content-wrapper { background: #ffffff; color: #1e293b; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .leaflet-popup-tip { background: #ffffff; }
+        .leaflet-popup-content-wrapper {
+            background: var(--card);
+            color: var(--fg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .leaflet-popup-tip { background: var(--card); }
         .popup-content { text-align: center; padding: 4px; }
         .popup-city { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
-        .popup-temp { font-size: 1.3rem; color: #3b82f6; font-weight: 700; }
-        .popup-details { color: #64748b; font-size: 0.75rem; margin-top: 6px; }
+        .popup-temp { font-size: 1.3rem; color: var(--primary); font-weight: 700; }
+        .popup-details { color: var(--muted-fg); font-size: 0.75rem; margin-top: 6px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1><span>PH</span> Weather Pipeline</h1>
+        <h1>PH Weather Pipeline</h1>
         <div class="header-meta">
-            Last updated: 08:47 PM<br>
+            Last updated: 10:27 PM<br>
             Auto-refresh every 30 min
         </div>
     </div>
@@ -86,13 +241,13 @@
         <div class="section-header">
             <div class="section-num">1</div>
             <div class="section-title">What is the weather right now across Philippine cities?</div>
-            <div class="section-answer">27.0&deg;C average, ranging from 21&deg;C to 30&deg;C</div>
+            <div class="section-answer">27.0&deg;C average, ranging from 23&deg;C to 30&deg;C</div>
         </div>
         <div class="kpi-row">
             <div class="kpi">
                 <div class="kpi-label">Average Temperature</div>
                 <div class="kpi-value">27.0&deg;C</div>
-                <div class="kpi-sub">Range: 9&deg;C spread</div>
+                <div class="kpi-sub">Range: 7&deg;C spread</div>
             </div>
             <div class="kpi">
                 <div class="kpi-label">Hottest City</div>
@@ -101,12 +256,12 @@
             </div>
             <div class="kpi">
                 <div class="kpi-label">Coolest City</div>
-                <div class="kpi-value">21&deg;C</div>
+                <div class="kpi-value">23&deg;C</div>
                 <div class="kpi-sub">Cebu City</div>
             </div>
             <div class="kpi">
                 <div class="kpi-label">Avg Humidity</div>
-                <div class="kpi-value">85%</div>
+                <div class="kpi-value">84%</div>
                 <div class="kpi-sub">across all cities</div>
             </div>
         </div>
@@ -114,50 +269,50 @@
             <div class="map-header">
                 <h3>Geographic Distribution</h3>
                 <div class="map-legend">
-                    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 32&deg;C+</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> 30-31&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> 28-29&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Below 28&deg;C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#ff3b30"></div> 32&deg;C+</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#ff9500"></div> 30-31&deg;C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#0071e3"></div> 28-29&deg;C</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#34c759"></div> Below 28&deg;C</div>
                 </div>
             </div>
             <div id="map"></div>
         </div>
         <div class="city-grid" id="city-grid">
             <div class="city-card">
-                <div class="city-name">Manila</div>
-                <div class="city-temp" style="color:#f59e0b">30&deg;C</div>
-                <div class="city-condition">Clear Sky</div>
-                <div class="city-detail">Feels 37&deg;C | 82% | 3km/h</div>
-            </div>
-            <div class="city-card">
-                <div class="city-name">Cebu City</div>
-                <div class="city-temp" style="color:#10b981">21&deg;C</div>
-                <div class="city-condition">Few Clouds</div>
-                <div class="city-detail">Feels 21&deg;C | 88% | 3km/h</div>
-            </div>
-            <div class="city-card">
-                <div class="city-name">Davao City</div>
-                <div class="city-temp" style="color:#10b981">24&deg;C</div>
-                <div class="city-condition">Moderate Rain</div>
-                <div class="city-detail">Feels 24&deg;C | 92% | 5km/h</div>
-            </div>
-            <div class="city-card">
-                <div class="city-name">Makati</div>
-                <div class="city-temp" style="color:#f59e0b">30&deg;C</div>
-                <div class="city-condition">Clear Sky</div>
-                <div class="city-detail">Feels 37&deg;C | 77% | 11km/h</div>
-            </div>
-            <div class="city-card">
-                <div class="city-name">Quezon City</div>
-                <div class="city-temp" style="color:#f59e0b">30&deg;C</div>
-                <div class="city-condition">Clear Sky</div>
-                <div class="city-detail">Feels 37&deg;C | 84% | 3km/h</div>
-            </div>
+                    <div class="city-name">Manila</div>
+                    <div class="city-temp" style="color:#ff9500">30&deg;C</div>
+                    <div class="city-condition">Clear Sky</div>
+                    <div class="city-detail">Feels 37&deg;C | 84% | 9km/h</div>
+                </div>
+<div class="city-card">
+                    <div class="city-name">Cebu City</div>
+                    <div class="city-temp" style="color:#34c759">23&deg;C</div>
+                    <div class="city-condition">Scattered Clouds</div>
+                    <div class="city-detail">Feels 23&deg;C | 83% | 3km/h</div>
+                </div>
+<div class="city-card">
+                    <div class="city-name">Davao City</div>
+                    <div class="city-temp" style="color:#34c759">23&deg;C</div>
+                    <div class="city-condition">Overcast Clouds</div>
+                    <div class="city-detail">Feels 24&deg;C | 91% | 5km/h</div>
+                </div>
+<div class="city-card">
+                    <div class="city-name">Makati</div>
+                    <div class="city-temp" style="color:#ff9500">30&deg;C</div>
+                    <div class="city-condition">Clear Sky</div>
+                    <div class="city-detail">Feels 37&deg;C | 80% | 10km/h</div>
+                </div>
+<div class="city-card">
+                    <div class="city-name">Quezon City</div>
+                    <div class="city-temp" style="color:#0071e3">29&deg;C</div>
+                    <div class="city-condition">Clear Sky</div>
+                    <div class="city-detail">Feels 36&deg;C | 84% | 2km/h</div>
+                </div>
         </div>
         <div class="section-header">
             <div class="section-num">2</div>
             <div class="section-title">How do cities compare to each other?</div>
-            <div class="section-answer">Manila is 9&deg;C warmer than Cebu City</div>
+            <div class="section-answer">Manila is 7&deg;C warmer than Cebu City</div>
         </div>
         <div class="charts-grid">
             <div class="chart-card">
@@ -171,25 +326,25 @@
         </div>
         <div class="section-header">
             <div class="section-num">3</div>
-            <div class="section-title">What patterns and insights emerge from the data?</div>
-            <div class="section-answer">3 different conditions across 5 cities</div>
+            <div class="section-title">What patterns emerge from the data?</div>
+            <div class="section-answer">2 conditions across 5 cities</div>
         </div>
         <div class="insights-grid">
             <div class="insight-card">
                 <h5>Regional Variation</h5>
-                <p>Temperature varies by 9&deg;C across the archipelago. Manila leads at 30&deg;C, while Cebu City is coolest at 21&deg;C.</p>
+                <p>Temperature varies by 7&deg;C across the archipelago. Manila leads at 30&deg;C, while Cebu City is coolest at 23&deg;C.</p>
             </div>
             <div class="insight-card">
-                <h5>Humidity Pattern</h5>
-                <p>Davao City has the highest humidity at 92%. Rain is currently falling in Davao City.</p>
+                <h5>Humidity Range</h5>
+                <p>Davao City has the highest humidity at 91%. All cities are currently dry.</p>
             </div>
             <div class="insight-card">
-                <h5>Weather Diversity</h5>
-                <p>Rain, Clouds, Clear. The archipelago's geography creates distinct microclimates across regions.</p>
+                <h5>Weather Conditions</h5>
+                <p>Clouds, Clear. The archipelago's geography creates varying weather patterns across regions.</p>
             </div>
             <div class="insight-card">
-                <h5>Live Data</h5>
-                <p>Data sourced from OpenWeatherMap API and refreshed every 30 minutes via GitHub Actions.</p>
+                <h5>Data Pipeline</h5>
+                <p>OpenWeatherMap API provides raw data. GitHub Actions triggers the pipeline every 30 minutes. dbt transforms raw JSON into a Snowflake star schema for analysis.</p>
             </div>
         </div>
         <div class="section-header">
@@ -201,7 +356,7 @@
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">08:47 PM</div></div>
+            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">10:27 PM</div></div>
         </div>
     </div>
     <div class="footer">
@@ -209,12 +364,12 @@
         <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
     </div>
     <script>
-        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 30, "feels_like": 37, "humidity": 82, "wind": 3, "condition": "Clear", "description": "Clear Sky"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 21, "feels_like": 21, "humidity": 88, "wind": 3, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 24, "feels_like": 24, "humidity": 92, "wind": 5, "condition": "Rain", "description": "Moderate Rain"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 30, "feels_like": 37, "humidity": 77, "wind": 11, "condition": "Clear", "description": "Clear Sky"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 30, "feels_like": 37, "humidity": 84, "wind": 3, "condition": "Clear", "description": "Clear Sky"}];
+        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 30, "feels_like": 37, "humidity": 84, "wind": 9, "condition": "Clear", "description": "Clear Sky"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 23, "feels_like": 23, "humidity": 83, "wind": 3, "condition": "Clouds", "description": "Scattered Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 23, "feels_like": 24, "humidity": 91, "wind": 5, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 30, "feels_like": 37, "humidity": 80, "wind": 10, "condition": "Clear", "description": "Clear Sky"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 29, "feels_like": 36, "humidity": 84, "wind": 2, "condition": "Clear", "description": "Clear Sky"}];
         function getMarkerColor(temp) {
-            if (temp >= 32) return '#ef4444';
-            if (temp >= 30) return '#f59e0b';
-            if (temp >= 28) return '#3b82f6';
-            return '#10b981';
+            if (temp >= 32) return '#ff3b30';
+            if (temp >= 30) return '#ff9500';
+            if (temp >= 28) return '#0071e3';
+            return '#34c759';
         }
         function initMap() {
             const map = L.map('map', { zoomControl: false }).setView([12.8797, 121.7740], 6);
@@ -233,12 +388,12 @@
             new Chart(document.getElementById('tempChart'), {
                 type: 'bar',
                 data: { labels: weatherData.map(d => d.city), datasets: [{ data: weatherData.map(d => d.temp), backgroundColor: weatherData.map(d => getMarkerColor(d.temp)), borderRadius: 4, barThickness: 28 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 20, max: 40, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 20, max: 40, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6e6e73' } }, x: { grid: { display: false }, ticks: { color: '#6e6e73' } } } }
             });
             new Chart(document.getElementById('humidityChart'), {
                 type: 'bar',
-                data: { labels: weatherData.map(d => d.city), datasets: [{ data: weatherData.map(d => d.humidity), backgroundColor: '#3b82f6', borderRadius: 4, barThickness: 28 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 50, max: 100, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
+                data: { labels: weatherData.map(d => d.city), datasets: [{ data: weatherData.map(d => d.humidity), backgroundColor: '#0071e3', borderRadius: 4, barThickness: 28 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 50, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6e6e73' } }, x: { grid: { display: false }, ticks: { color: '#6e6e73' } } } }
             });
         }
         initMap();
