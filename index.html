@@ -326,25 +326,25 @@
         </div>
         <div class="section-header">
             <div class="section-num">3</div>
-            <div class="section-title">What patterns and insights emerge from the data?</div>
-            <div class="section-answer">1 different conditions across 5 cities</div>
+            <div class="section-title">What patterns emerge from the data?</div>
+            <div class="section-answer">Consistent cloud cover across all cities</div>
         </div>
         <div class="insights-grid">
             <div class="insight-card">
                 <h5>Regional Variation</h5>
-                <p>Temperature varies by 4°C across the archipelago. Manila leads at 33°C, while Cebu City is coolest at 29°C.</p>
+                <p>Temperature varies by 4°C across the archipelago. Manila and Quezon City share the highest reading at 33°C, while Cebu City and Davao City are coolest at 29°C.</p>
             </div>
             <div class="insight-card">
-                <h5>Humidity Pattern</h5>
-                <p>Davao City has the highest humidity at 77%. All cities are currently dry.</p>
+                <h5>Humidity Range</h5>
+                <p>Humidity spans 69% to 77% across cities. Davao City reads highest; Quezon City lowest. All readings indicate dry conditions without precipitation.</p>
             </div>
             <div class="insight-card">
-                <h5>Weather Diversity</h5>
-                <p>Clouds. The archipelago's geography creates distinct microclimates across regions.</p>
+                <h5>Cloud Coverage</h5>
+                <p>All five cities report cloud conditions ranging from few to overcast. The archipelago's geography creates varying cloud density across regions.</p>
             </div>
             <div class="insight-card">
-                <h5>Live Data</h5>
-                <p>Data sourced from OpenWeatherMap API and refreshed every 30 minutes via GitHub Actions.</p>
+                <h5>Data Pipeline</h5>
+                <p>OpenWeatherMap API provides raw data. GitHub Actions triggers the pipeline every 30 minutes. dbt transforms raw JSON into a Snowflake star schema for analysis.</p>
             </div>
         </div>
         <div class="section-header">
