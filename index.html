@@ -225,7 +225,7 @@
     <div class="header">
         <h1>PH Weather Pipeline</h1>
         <div class="header-meta">
-            Last updated: 09:08 PM<br>
+            Last updated: 09:50 PM<br>
             Auto-refresh every 30 min
         </div>
     </div>
@@ -281,8 +281,8 @@
             <div class="city-card">
                     <div class="city-name">Manila</div>
                     <div class="city-temp" style="color:#0071e3">29&deg;C</div>
-                    <div class="city-condition">Moderate Rain</div>
-                    <div class="city-detail">Feels 35&deg;C | 88% | 32km/h</div>
+                    <div class="city-condition">Light Rain</div>
+                    <div class="city-detail">Feels 35&deg;C | 88% | 29km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Cebu City</div>
@@ -294,19 +294,19 @@
                     <div class="city-name">Davao City</div>
                     <div class="city-temp" style="color:#34c759">26&deg;C</div>
                     <div class="city-condition">Light Rain</div>
-                    <div class="city-detail">Feels 26&deg;C | 91% | 4km/h</div>
+                    <div class="city-detail">Feels 27&deg;C | 90% | 2km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Makati</div>
                     <div class="city-temp" style="color:#0071e3">29&deg;C</div>
                     <div class="city-condition">Light Rain</div>
-                    <div class="city-detail">Feels 35&deg;C | 82% | 13km/h</div>
+                    <div class="city-detail">Feels 34&deg;C | 82% | 13km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Quezon City</div>
                     <div class="city-temp" style="color:#0071e3">28&deg;C</div>
-                    <div class="city-condition">Moderate Rain</div>
-                    <div class="city-detail">Feels 35&deg;C | 91% | 32km/h</div>
+                    <div class="city-condition">Light Rain</div>
+                    <div class="city-detail">Feels 35&deg;C | 91% | 29km/h</div>
                 </div>
         </div>
         <div class="section-header">
@@ -336,7 +336,7 @@
             </div>
             <div class="insight-card">
                 <h5>Humidity Range</h5>
-                <p>Davao City has the highest humidity at 91%. Rain is currently falling in Manila and Davao City and Makati and Quezon City.</p>
+                <p>Quezon City has the highest humidity at 91%. Rain is currently falling in Manila and Davao City and Makati and Quezon City.</p>
             </div>
             <div class="insight-card">
                 <h5>Weather Conditions</h5>
@@ -356,7 +356,7 @@
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">09:08 PM</div></div>
+            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">09:50 PM</div></div>
         </div>
     </div>
     <div class="footer">
@@ -364,7 +364,7 @@
         <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
     </div>
     <script>
-        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 29, "feels_like": 35, "humidity": 88, "wind": 32, "condition": "Rain", "description": "Moderate Rain"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 29, "feels_like": 35, "humidity": 84, "wind": 11, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 26, "feels_like": 26, "humidity": 91, "wind": 4, "condition": "Rain", "description": "Light Rain"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 29, "feels_like": 35, "humidity": 82, "wind": 13, "condition": "Rain", "description": "Light Rain"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 28, "feels_like": 35, "humidity": 91, "wind": 32, "condition": "Rain", "description": "Moderate Rain"}];
+        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 29, "feels_like": 35, "humidity": 88, "wind": 29, "condition": "Rain", "description": "Light Rain"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 29, "feels_like": 35, "humidity": 84, "wind": 11, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 26, "feels_like": 27, "humidity": 90, "wind": 2, "condition": "Rain", "description": "Light Rain"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 29, "feels_like": 34, "humidity": 82, "wind": 13, "condition": "Rain", "description": "Light Rain"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 28, "feels_like": 35, "humidity": 91, "wind": 29, "condition": "Rain", "description": "Light Rain"}];
         function getMarkerColor(temp) {
             if (temp >= 32) return '#ff3b30';
             if (temp >= 30) return '#ff9500';
