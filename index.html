@@ -225,7 +225,7 @@
     <div class="header">
         <h1>PH Weather Pipeline</h1>
         <div class="header-meta">
-            Last updated: 03:45 AM<br>
+            Last updated: 06:00 AM<br>
             Auto-refresh every 30 min
         </div>
     </div>
@@ -282,31 +282,31 @@
                     <div class="city-name">Manila</div>
                     <div class="city-temp" style="color:#34c759">25&deg;C</div>
                     <div class="city-condition">Overcast Clouds</div>
-                    <div class="city-detail">Feels 26&deg;C | 94% | 7km/h</div>
+                    <div class="city-detail">Feels 26&deg;C | 94% | 20km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Cebu City</div>
                     <div class="city-temp" style="color:#0071e3">28&deg;C</div>
                     <div class="city-condition">Broken Clouds</div>
-                    <div class="city-detail">Feels 31&deg;C | 74% | 13km/h</div>
+                    <div class="city-detail">Feels 31&deg;C | 78% | 19km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Davao City</div>
                     <div class="city-temp" style="color:#34c759">24&deg;C</div>
-                    <div class="city-condition">Overcast Clouds</div>
-                    <div class="city-detail">Feels 25&deg;C | 90% | 6km/h</div>
+                    <div class="city-condition">Broken Clouds</div>
+                    <div class="city-detail">Feels 24&deg;C | 90% | 6km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Makati</div>
                     <div class="city-temp" style="color:#34c759">25&deg;C</div>
                     <div class="city-condition">Overcast Clouds</div>
-                    <div class="city-detail">Feels 26&deg;C | 92% | 7km/h</div>
+                    <div class="city-detail">Feels 26&deg;C | 91% | 20km/h</div>
                 </div>
 <div class="city-card">
                     <div class="city-name">Quezon City</div>
                     <div class="city-temp" style="color:#34c759">25&deg;C</div>
-                    <div class="city-condition">Overcast Clouds</div>
-                    <div class="city-detail">Feels 26&deg;C | 98% | 7km/h</div>
+                    <div class="city-condition">Heavy Intensity Rain</div>
+                    <div class="city-detail">Feels 26&deg;C | 98% | 20km/h</div>
                 </div>
         </div>
         <div class="section-header">
@@ -327,7 +327,7 @@
         <div class="section-header">
             <div class="section-num">3</div>
             <div class="section-title">What patterns emerge from the data?</div>
-            <div class="section-answer">1 condition across 5 cities</div>
+            <div class="section-answer">2 conditions across 5 cities</div>
         </div>
         <div class="insights-grid">
             <div class="insight-card">
@@ -336,11 +336,11 @@
             </div>
             <div class="insight-card">
                 <h5>Humidity Range</h5>
-                <p>Quezon City has the highest humidity at 98%. All cities are currently dry.</p>
+                <p>Quezon City has the highest humidity at 98%. Rain is currently falling in Quezon City.</p>
             </div>
             <div class="insight-card">
                 <h5>Weather Conditions</h5>
-                <p>Clouds. The archipelago's geography creates varying weather patterns across regions.</p>
+                <p>Rain, Clouds. The archipelago's geography creates varying weather patterns across regions.</p>
             </div>
             <div class="insight-card">
                 <h5>Data Pipeline</h5>
@@ -356,7 +356,7 @@
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
             <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">03:45 AM</div></div>
+            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">06:00 AM</div></div>
         </div>
     </div>
     <div class="footer">
@@ -364,7 +364,7 @@
         <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
     </div>
     <script>
-        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 25, "feels_like": 26, "humidity": 94, "wind": 7, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 28, "feels_like": 31, "humidity": 74, "wind": 13, "condition": "Clouds", "description": "Broken Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 24, "feels_like": 25, "humidity": 90, "wind": 6, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 25, "feels_like": 26, "humidity": 92, "wind": 7, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 25, "feels_like": 26, "humidity": 98, "wind": 7, "condition": "Clouds", "description": "Overcast Clouds"}];
+        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 25, "feels_like": 26, "humidity": 94, "wind": 20, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 28, "feels_like": 31, "humidity": 78, "wind": 19, "condition": "Clouds", "description": "Broken Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 24, "feels_like": 24, "humidity": 90, "wind": 6, "condition": "Clouds", "description": "Broken Clouds"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 25, "feels_like": 26, "humidity": 91, "wind": 20, "condition": "Clouds", "description": "Overcast Clouds"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 25, "feels_like": 26, "humidity": 98, "wind": 20, "condition": "Rain", "description": "Heavy Intensity Rain"}];
         function getMarkerColor(temp) {
             if (temp >= 32) return '#ff3b30';
             if (temp >= 30) return '#ff9500';
