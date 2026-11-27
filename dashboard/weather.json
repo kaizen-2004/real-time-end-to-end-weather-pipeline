@@ -1,0 +1,10 @@
+{
+  "published_at": null,
+  "cities": [
+    {"city":"Manila","lat":14.5995,"lon":120.9842,"temp":32,"feels_like":37,"humidity":62,"wind":13,"description":"Few Clouds","observed_at":null},
+    {"city":"Cebu City","lat":10.3157,"lon":123.8854,"temp":31,"feels_like":37,"humidity":70,"wind":15,"description":"Few Clouds","observed_at":null},
+    {"city":"Davao City","lat":7.1907,"lon":125.4553,"temp":31,"feels_like":35,"humidity":62,"wind":10,"description":"Few Clouds","observed_at":null},
+    {"city":"Makati","lat":14.5547,"lon":121.05,"temp":32,"feels_like":37,"humidity":62,"wind":14,"description":"Few Clouds","observed_at":null},
+    {"city":"Quezon City","lat":14.676,"lon":121.0437,"temp":32,"feels_like":35,"humidity":58,"wind":13,"description":"Few Clouds","observed_at":null}
+  ]
+}

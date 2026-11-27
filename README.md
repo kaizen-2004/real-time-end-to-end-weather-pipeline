@@ -1,6 +1,6 @@
 # Philippine Weather Pipeline
 
-End-to-end ELT data pipeline that tracks real-time weather across 5 Philippine cities using Apache Airflow, PostgreSQL, dbt, and Snowflake. Live dashboard auto-refreshes every 30 minutes with data from OpenWeatherMap API.
+End-to-end ELT data pipeline that tracks weather across five Philippine cities using Apache Airflow, PostgreSQL, dbt, and Snowflake. The public dashboard reads a separate OpenWeather snapshot collected by GitHub Actions on a 30-minute schedule.
 
 [Live Dashboard](https://kaizen-2004.github.io/real-time-end-to-end-weather-pipeline/) | [Author](https://steve-villa-devportfolio.netlify.app/)
 
@@ -24,10 +24,9 @@ Built an end-to-end ELT pipeline that:
 ## Architecture
 
 ```
-OpenWeatherMap API ──→ GitHub Actions (every 30 min) ──→ Live Dashboard
-                          │
-                          ▼
-                    Airflow DAG ──→ PostgreSQL (raw) ──→ dbt ──→ Snowflake
+OpenWeatherMap API ──→ GitHub Actions (every 30 min) ──→ JSON snapshot ──→ Dashboard
+        │
+        └───────────→ Airflow DAG ──→ PostgreSQL (raw) ──→ dbt ──→ Snowflake
                                                                │
                                                                ▼
                                                          Star Schema
@@ -45,7 +44,7 @@ OpenWeatherMap API ──→ GitHub Actions (every 30 min) ──→ Live Dashbo
 | 3 | PostgreSQL | Stores raw JSONB | `raw.weather_current` |
 | 4 | dbt staging | Flattens JSON into typed columns | `staging.stg_weather__current` |
 | 5 | dbt marts | Star schema dimensions + facts | `marts.dim_cities`, `fct_weather_readings` |
-| 6 | Dashboard | Fetches live API data | Interactive geospatial visualization |
+| 6 | Dashboard | Reads the separate GitHub Actions snapshot | Interactive geospatial visualization |
 
 ---
 
@@ -59,8 +58,8 @@ OpenWeatherMap API ──→ GitHub Actions (every 30 min) ──→ Live Dashbo
 | Warehouse | Snowflake | Analytics-ready star schema |
 | Containerization | Docker Compose | Reproducible local environment |
 | API | OpenWeatherMap | Weather data source |
-| Dashboard | Chart.js + Leaflet | Interactive geospatial visualization |
-| Automation | GitHub Actions | Auto-refresh dashboard every 30 min |
+| Dashboard | HTML, CSS, JavaScript + Leaflet | City readings, comparisons, and observation map |
+| Automation | GitHub Actions | Scheduled snapshot collection every 30 min |
 
 ---
 
@@ -176,15 +175,18 @@ ORDER BY c.city_name, d.date_key;
 
 ---
 
-## Dashboard Auto-Refresh
+## Dashboard Snapshot Updates
 
-The live dashboard is automatically updated every 30 minutes via GitHub Actions:
+GitHub Actions is scheduled to collect a new snapshot every 30 minutes:
 
 1. **GitHub Actions workflow** runs `scripts/update_dashboard.py`
 2. Script fetches live data from OpenWeatherMap API
-3. Generates new `index.html` with real-time data
-4. Commits and pushes to the repository
-5. GitHub Pages serves the updated dashboard
+3. Writes `dashboard/weather.json` with a publication timestamp and each city's observation time
+4. Commits and pushes the JSON file; the dashboard fetches it when the page opens
+
+Failed city requests appear as unavailable and are excluded from comparisons. If every request fails, the previous snapshot is retained. Readings older than 90 minutes, or whose observation times are unknown, are labelled accordingly. The bundled archive has no verified timestamp.
+
+To preview locally, run `python -m http.server` in the repository root and open `http://localhost:8000/`.
 
 ### Setting Up Auto-Refresh
 
@@ -217,7 +219,7 @@ weather-pipeline/
 │   ├── postgres/
 │   └── snowflake/
 ├── scripts/
-│   ├── update_dashboard.py    # Fetch live data, generate HTML
+│   ├── update_dashboard.py    # Fetch observations and publish JSON
 │   └── seed_snowflake.py      # Initialize Snowflake schemas
 ├── tests/                     # Unit tests
 ├── docker-compose.yml         # Service orchestration

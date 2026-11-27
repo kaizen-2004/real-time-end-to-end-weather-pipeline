@@ -1,463 +1,93 @@
-import os
+"""Publish a weather snapshot without rewriting the dashboard's static files."""
+
 import json
+import math
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import TypedDict
+
 import requests
-from datetime import datetime, timezone, timedelta
 
-API_KEY = os.environ.get('OPENWEATHER_API_KEY', '')
-PHT = timezone(timedelta(hours=8))
+API_URL = "https://api.openweathermap.org/data/2.5/weather"
+SNAPSHOT_PATH = Path(__file__).resolve().parents[1] / "dashboard" / "weather.json"
 
-CITIES = [
-    {"city_id": 1701668, "name": "Manila", "lat": 14.5995, "lon": 120.9842},
-    {"city_id": 1687110, "name": "Cebu City", "lat": 10.3157, "lon": 123.8854},
-    {"city_id": 711713, "name": "Davao City", "lat": 7.1907, "lon": 125.4553},
-    {"city_id": 1704068, "name": "Makati", "lat": 14.5547, "lon": 121.0500},
-    {"city_id": 1694282, "name": "Quezon City", "lat": 14.6760, "lon": 121.0437},
-]
-
-
-def fetch_weather():
-    weather_data = []
-    for city in CITIES:
-        try:
-            url = f"https://api.openweathermap.org/data/2.5/weather?lat={city['lat']}&lon={city['lon']}&appid={API_KEY}&units=metric"
-            resp = requests.get(url, timeout=10)
-            resp.raise_for_status()
-            data = resp.json()
-            weather_data.append({
-                "city": city["name"],
-                "lat": city["lat"],
-                "lon": city["lon"],
-                "temp": round(data["main"]["temp"]),
-                "feels_like": round(data["main"]["feels_like"]),
-                "humidity": data["main"]["humidity"],
-                "wind": round(data["wind"]["speed"] * 3.6),
-                "condition": data["weather"][0]["main"],
-                "description": data["weather"][0]["description"].title(),
-            })
-        except Exception as e:
-            print(f"Error fetching {city['name']}: {e}")
-            weather_data.append({
-                "city": city["name"], "lat": city["lat"], "lon": city["lon"],
-                "temp": 0, "feels_like": 0, "humidity": 0, "wind": 0,
-                "condition": "Unknown", "description": "Data unavailable",
-            })
-    return weather_data
+CITIES = (
+    ("Manila", 14.5995, 120.9842),
+    ("Cebu City", 10.3157, 123.8854),
+    ("Davao City", 7.1907, 125.4553),
+    ("Makati", 14.5547, 121.0500),
+    ("Quezon City", 14.6760, 121.0437),
+)
 
 
-def generate_html(weather_data):
-    temps = [w["temp"] for w in weather_data]
-    humidities = [w["humidity"] for w in weather_data]
-    avg_temp = round(sum(temps) / len(temps), 1)
-    avg_humidity = round(sum(humidities) / len(humidities))
-    max_temp = max(temps)
-    min_temp = min(temps)
-    temp_range = max_temp - min_temp
-    hottest = next(w for w in weather_data if w["temp"] == max_temp)
-    coolest = next(w for w in weather_data if w["temp"] == min_temp)
-    conditions = list(set(w["condition"] for w in weather_data))
-    max_humidity = max(humidities)
-    most_humid = next(w for w in weather_data if w["humidity"] == max_humidity)
-    rainy = [w["city"] for w in weather_data if "rain" in w["condition"].lower()]
+class Reading(TypedDict):
+    city: str
+    lat: float
+    lon: float
+    temp: int | None
+    feels_like: int | None
+    humidity: int | None
+    wind: int | None
+    description: str
+    observed_at: str | None
 
-    now = datetime.now(PHT).strftime("%I:%M %p")
 
-    weather_json = json.dumps(weather_data)
+def fetch_weather(api_key: str) -> list[Reading]:
+    readings: list[Reading] = []
+    with requests.Session() as session:
+        for name, lat, lon in CITIES:
+            reading: Reading = {
+                "city": name, "lat": lat, "lon": lon, "temp": None,
+                "feels_like": None, "humidity": None, "wind": None,
+                "description": "Data unavailable", "observed_at": None,
+            }
+            try:
+                response = session.get(API_URL, params={
+                    "lat": lat, "lon": lon, "appid": api_key, "units": "metric"
+                }, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                temp = float(data["main"]["temp"])
+                feels_like = float(data["main"]["feels_like"])
+                humidity = float(data["main"]["humidity"])
+                wind = float(data["wind"]["speed"]) * 3.6
+                if not all(map(math.isfinite, (temp, feels_like, humidity, wind))):
+                    raise ValueError("Non-finite weather reading")
+                if not 0 <= humidity <= 100 or wind < 0:
+                    raise ValueError("Weather reading out of range")
+                observed = datetime.fromtimestamp(data["dt"], tz=timezone.utc).isoformat()
+                description = data["weather"][0]["description"].title()
+            except (requests.RequestException, ValueError, KeyError, TypeError, IndexError, AttributeError, OverflowError, OSError) as error:
+                # Request exception strings can include the API key in the URL.
+                print(f"Could not fetch {name}: {type(error).__name__}")
+            else:
+                reading.update(temp=round(temp), feels_like=round(feels_like),
+                               humidity=round(humidity), wind=round(wind),
+                               description=description, observed_at=observed)
+            readings.append(reading)
+    return readings
 
-    def t(city):
-        color = "#ff3b30" if city["temp"] >= 32 else "#ff9500" if city["temp"] >= 30 else "#0071e3" if city["temp"] >= 28 else "#34c759"
-        return f'''<div class="city-card">
-                    <div class="city-name">{city["city"]}</div>
-                    <div class="city-temp" style="color:{color}">{city["temp"]}&deg;C</div>
-                    <div class="city-condition">{city["description"]}</div>
-                    <div class="city-detail">Feels {city["feels_like"]}&deg;C | {city["humidity"]}% | {city["wind"]}km/h</div>
-                </div>'''
 
-    city_cards = "\n".join(t(c) for c in weather_data)
+def write_snapshot(readings: list[Reading], path: Path = SNAPSHOT_PATH) -> int:
+    count = sum(reading["observed_at"] is not None for reading in readings)
+    if not count:
+        raise SystemExit("No city readings were retrieved; keeping the previous snapshot.")
+    snapshot = {"published_at": datetime.now(timezone.utc).isoformat(), "cities": readings}
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(snapshot, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temporary.replace(path)
+    return count
 
-    rain_text = f'Rain is currently falling in {" and ".join(rainy)}.' if rainy else "All cities are currently dry."
 
-    html = f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philippine Weather Pipeline</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        :root {{
-            --bg: #ffffff;
-            --fg: #1d1d1f;
-            --card: #ffffff;
-            --card-fg: #1d1d1f;
-            --primary: #0071e3;
-            --primary-fg: #ffffff;
-            --secondary: #f5f5f7;
-            --secondary-fg: #1d1d1f;
-            --muted: #f5f5f7;
-            --muted-fg: #6e6e73;
-            --border: rgba(0, 0, 0, 0.08);
-            --success: #34c759;
-            --error: #ff3b30;
-        }}
-
-        @media (prefers-color-scheme: dark) {{
-            :root {{
-                --bg: #1d1d1f;
-                --fg: #f5f5f7;
-                --card: #2c2c2e;
-                --card-fg: #f5f5f7;
-                --primary: #2997ff;
-                --primary-fg: #ffffff;
-                --secondary: #3a3a3c;
-                --secondary-fg: #f5f5f7;
-                --muted: #3a3a3c;
-                --muted-fg: #aeaeb2;
-                --border: rgba(255, 255, 255, 0.1);
-                --success: #30d158;
-                --error: #ff453a;
-            }}
-        }}
-
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        html, body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.5;
-        }}
-        .header {{
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 8px;
-        }}
-        .header h1 {{ font-size: 1.2rem; font-weight: 600; color: var(--fg); }}
-        .header-meta {{ text-align: right; color: var(--muted-fg); font-size: 0.8rem; }}
-        .problem-section {{
-            padding: 24px 32px;
-            background: var(--secondary);
-            border-bottom: 1px solid var(--border);
-        }}
-        .problem-label {{
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }}
-        .problem-text {{ font-size: 1rem; color: var(--muted-fg); line-height: 1.6; max-width: 900px; }}
-        .problem-text strong {{ color: var(--fg); }}
-        .main {{ padding: 24px 32px; overflow: hidden; }}
-        .section-header {{
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }}
-        .section-num {{
-            background: var(--primary);
-            color: var(--primary-fg);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }}
-        .section-title {{ font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted-fg); }}
-        .section-answer {{ font-size: 0.9rem; color: var(--primary); margin-left: auto; white-space: nowrap; }}
-        .kpi-row {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }}
-        .kpi {{
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }}
-        .kpi-label {{ color: var(--muted-fg); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }}
-        .kpi-value {{ font-size: 1.4rem; font-weight: 700; color: var(--fg); margin-top: 4px; }}
-        .kpi-sub {{ color: var(--primary); font-size: 0.75rem; margin-top: 4px; }}
-        .map-container {{
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 32px;
-        }}
-        .map-header {{
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .map-header h3 {{ font-size: 0.85rem; color: var(--fg); font-weight: 500; }}
-        .map-legend {{ display: flex; gap: 12px; font-size: 0.7rem; }}
-        .legend-item {{ display: flex; align-items: center; gap: 4px; color: var(--muted-fg); }}
-        .legend-dot {{ width: 8px; height: 8px; border-radius: 50%; }}
-        #map {{ aspect-ratio: 2 / 1; width: 100%; max-height: 400px; }}
-        .city-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
-            margin-bottom: 32px;
-        }}
-        .city-card {{
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            transition: border-color 150ms ease;
-        }}
-        .city-card:hover {{ border-color: var(--primary); }}
-        .city-name {{ font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 6px; }}
-        .city-temp {{ font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }}
-        .city-condition {{ font-size: 0.7rem; color: var(--muted-fg); }}
-        .city-detail {{ font-size: 0.65rem; color: var(--muted-fg); margin-top: 6px; }}
-        .charts-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }}
-        .chart-card {{
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            min-width: 0;
-        }}
-        .chart-card h4 {{ font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 12px; font-weight: 500; }}
-        .chart-container {{ height: 220px; position: relative; width: 100%; }}
-        .insights-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }}
-        .insight-card {{
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }}
-        .insight-card h5 {{ font-size: 0.75rem; color: var(--primary); margin-bottom: 6px; font-weight: 500; }}
-        .insight-card p {{ font-size: 0.8rem; color: var(--muted-fg); line-height: 1.5; }}
-        .pipeline-status {{
-            display: flex;
-            gap: 24px;
-            padding: 16px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }}
-        .status-item {{ display: flex; align-items: center; gap: 8px; }}
-        .status-dot {{ width: 8px; height: 8px; border-radius: 50%; background: var(--success); }}
-        .status-label {{ font-size: 0.75rem; color: var(--muted-fg); }}
-        .status-value {{ font-size: 0.75rem; color: var(--fg); }}
-        .footer {{
-            padding: 16px 32px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--muted-fg);
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-            gap: 8px;
-        }}
-        .footer a {{ color: var(--primary); text-decoration: none; }}
-        .footer a:hover {{ text-decoration: underline; }}
-        .leaflet-popup-content-wrapper {{
-            background: var(--card);
-            color: var(--fg);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }}
-        .leaflet-popup-tip {{ background: var(--card); }}
-        .popup-content {{ text-align: center; padding: 4px; }}
-        .popup-city {{ font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }}
-        .popup-temp {{ font-size: 1.3rem; color: var(--primary); font-weight: 700; }}
-        .popup-details {{ color: var(--muted-fg); font-size: 0.75rem; margin-top: 6px; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>PH Weather Pipeline</h1>
-        <div class="header-meta">
-            Last updated: {now}<br>
-            Auto-refresh every 30 min
-        </div>
-    </div>
-    <div class="problem-section">
-        <div class="problem-label">Problem Statement</div>
-        <div class="problem-text">
-            Weather data across the <strong>Philippine archipelago varies significantly by region</strong>.
-            No automated pipeline existed to collect, transform, and visualize real-time weather data
-            for multiple cities in a <strong>structured, analytics-ready format</strong>.
-        </div>
-    </div>
-    <div class="main">
-        <div class="section-header">
-            <div class="section-num">1</div>
-            <div class="section-title">What is the weather right now across Philippine cities?</div>
-            <div class="section-answer">{avg_temp}&deg;C average, ranging from {min_temp}&deg;C to {max_temp}&deg;C</div>
-        </div>
-        <div class="kpi-row">
-            <div class="kpi">
-                <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-value">{avg_temp}&deg;C</div>
-                <div class="kpi-sub">Range: {temp_range}&deg;C spread</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Hottest City</div>
-                <div class="kpi-value">{max_temp}&deg;C</div>
-                <div class="kpi-sub">{hottest["city"]}</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Coolest City</div>
-                <div class="kpi-value">{min_temp}&deg;C</div>
-                <div class="kpi-sub">{coolest["city"]}</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Avg Humidity</div>
-                <div class="kpi-value">{avg_humidity}%</div>
-                <div class="kpi-sub">across all cities</div>
-            </div>
-        </div>
-        <div class="map-container">
-            <div class="map-header">
-                <h3>Geographic Distribution</h3>
-                <div class="map-legend">
-                    <div class="legend-item"><div class="legend-dot" style="background:#ff3b30"></div> 32&deg;C+</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#ff9500"></div> 30-31&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#0071e3"></div> 28-29&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#34c759"></div> Below 28&deg;C</div>
-                </div>
-            </div>
-            <div id="map"></div>
-        </div>
-        <div class="city-grid" id="city-grid">
-            {city_cards}
-        </div>
-        <div class="section-header">
-            <div class="section-num">2</div>
-            <div class="section-title">How do cities compare to each other?</div>
-            <div class="section-answer">{hottest["city"]} is {temp_range}&deg;C warmer than {coolest["city"]}</div>
-        </div>
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h4>Temperature Comparison</h4>
-                <div class="chart-container"><canvas id="tempChart"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <h4>Humidity Levels</h4>
-                <div class="chart-container"><canvas id="humidityChart"></canvas></div>
-            </div>
-        </div>
-        <div class="section-header">
-            <div class="section-num">3</div>
-            <div class="section-title">What patterns emerge from the data?</div>
-            <div class="section-answer">{len(conditions)} condition{"s" if len(conditions) != 1 else ""} across 5 cities</div>
-        </div>
-        <div class="insights-grid">
-            <div class="insight-card">
-                <h5>Regional Variation</h5>
-                <p>Temperature varies by {temp_range}&deg;C across the archipelago. {hottest["city"]} leads at {max_temp}&deg;C, while {coolest["city"]} is coolest at {min_temp}&deg;C.</p>
-            </div>
-            <div class="insight-card">
-                <h5>Humidity Range</h5>
-                <p>{most_humid["city"]} has the highest humidity at {max_humidity}%. {rain_text}</p>
-            </div>
-            <div class="insight-card">
-                <h5>Weather Conditions</h5>
-                <p>{", ".join(conditions)}. The archipelago's geography creates varying weather patterns across regions.</p>
-            </div>
-            <div class="insight-card">
-                <h5>Data Pipeline</h5>
-                <p>OpenWeatherMap API provides raw data. GitHub Actions triggers the pipeline every 30 minutes. dbt transforms raw JSON into a Snowflake star schema for analysis.</p>
-            </div>
-        </div>
-        <div class="section-header">
-            <div class="section-num">4</div>
-            <div class="section-title">Is the pipeline delivering fresh, reliable data?</div>
-        </div>
-        <div class="pipeline-status">
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Pipeline</div><div class="status-value">Active</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">{now}</div></div>
-        </div>
-    </div>
-    <div class="footer">
-        <div>Built by <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank">Steve A. Villa</a> | Data: OpenWeatherMap API</div>
-        <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
-    </div>
-    <script>
-        const weatherData = {weather_json};
-        function getMarkerColor(temp) {{
-            if (temp >= 32) return '#ff3b30';
-            if (temp >= 30) return '#ff9500';
-            if (temp >= 28) return '#0071e3';
-            return '#34c759';
-        }}
-        function initMap() {{
-            const map = L.map('map', {{ zoomControl: false }}).setView([12.8797, 121.7740], 6);
-            L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
-                attribution: 'OpenStreetMap, CARTO', maxZoom: 19
-            }}).addTo(map);
-            weatherData.forEach(city => {{
-                const marker = L.circleMarker([city.lat, city.lon], {{
-                    radius: 18, fillColor: getMarkerColor(city.temp), color: '#fff', weight: 2, fillOpacity: 0.9
-                }}).addTo(map);
-                marker.bindPopup('<div class="popup-content"><div class="popup-city">' + city.city + '</div><div class="popup-temp">' + city.temp + '&deg;C</div><div class="popup-details">' + city.description + '<br>Feels ' + city.feels_like + '&deg;C | ' + city.humidity + '% | ' + city.wind + 'km/h</div></div>');
-                marker.bindTooltip(city.city, {{ permanent: true, direction: 'top', offset: [0, -12] }});
-            }});
-        }}
-        function initCharts() {{
-            new Chart(document.getElementById('tempChart'), {{
-                type: 'bar',
-                data: {{ labels: weatherData.map(d => d.city), datasets: [{{ data: weatherData.map(d => d.temp), backgroundColor: weatherData.map(d => getMarkerColor(d.temp)), borderRadius: 4, barThickness: 28 }}] }},
-                options: {{ responsive: true, maintainAspectRatio: false, plugins: {{ legend: {{ display: false }} }}, scales: {{ y: {{ min: 20, max: 40, grid: {{ color: 'rgba(0,0,0,0.06)' }}, ticks: {{ color: '#6e6e73' }} }}, x: {{ grid: {{ display: false }}, ticks: {{ color: '#6e6e73' }} }} }} }}
-            }});
-            new Chart(document.getElementById('humidityChart'), {{
-                type: 'bar',
-                data: {{ labels: weatherData.map(d => d.city), datasets: [{{ data: weatherData.map(d => d.humidity), backgroundColor: '#0071e3', borderRadius: 4, barThickness: 28 }}] }},
-                options: {{ responsive: true, maintainAspectRatio: false, plugins: {{ legend: {{ display: false }} }}, scales: {{ y: {{ min: 50, max: 100, grid: {{ color: 'rgba(0,0,0,0.06)' }}, ticks: {{ color: '#6e6e73' }} }}, x: {{ grid: {{ display: false }}, ticks: {{ color: '#6e6e73' }} }} }} }}
-            }});
-        }}
-        initMap();
-        initCharts();
-    </script>
-</body>
-</html>'''
-    return html
+def main() -> None:
+    api_key = os.environ.get("OPENWEATHER_API_KEY", "").strip()
+    if not api_key:
+        raise SystemExit("Set OPENWEATHER_API_KEY before updating the dashboard.")
+    readings = fetch_weather(api_key)
+    count = write_snapshot(readings)
+    print(f"Published a snapshot with {count} of {len(readings)} city readings.")
 
 
 if __name__ == "__main__":
-    print("Fetching live weather data...")
-    data = fetch_weather()
-    print(f"Got data for {len(data)} cities")
-    html = generate_html(data)
-    with open("index.html", "w") as f:
-        f.write(html)
-    print("Dashboard updated with live data!")
+    main()

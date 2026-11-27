@@ -1,403 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-PH">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philippine Weather Pipeline</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        :root {
-            --bg: #ffffff;
-            --fg: #1d1d1f;
-            --card: #ffffff;
-            --card-fg: #1d1d1f;
-            --primary: #0071e3;
-            --primary-fg: #ffffff;
-            --secondary: #f5f5f7;
-            --secondary-fg: #1d1d1f;
-            --muted: #f5f5f7;
-            --muted-fg: #6e6e73;
-            --border: rgba(0, 0, 0, 0.08);
-            --success: #34c759;
-            --error: #ff3b30;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #1d1d1f;
-                --fg: #f5f5f7;
-                --card: #2c2c2e;
-                --card-fg: #f5f5f7;
-                --primary: #2997ff;
-                --primary-fg: #ffffff;
-                --secondary: #3a3a3c;
-                --secondary-fg: #f5f5f7;
-                --muted: #3a3a3c;
-                --muted-fg: #aeaeb2;
-                --border: rgba(255, 255, 255, 0.1);
-                --success: #30d158;
-                --error: #ff453a;
-            }
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.5;
-        }
-        .header {
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .header h1 { font-size: 1.2rem; font-weight: 600; color: var(--fg); }
-        .header-meta { text-align: right; color: var(--muted-fg); font-size: 0.8rem; }
-        .problem-section {
-            padding: 24px 32px;
-            background: var(--secondary);
-            border-bottom: 1px solid var(--border);
-        }
-        .problem-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-        .problem-text { font-size: 1rem; color: var(--muted-fg); line-height: 1.6; max-width: 900px; }
-        .problem-text strong { color: var(--fg); }
-        .main { padding: 24px 32px; overflow: hidden; }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .section-num {
-            background: var(--primary);
-            color: var(--primary-fg);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted-fg); }
-        .section-answer { font-size: 0.9rem; color: var(--primary); margin-left: auto; white-space: nowrap; }
-        .kpi-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-        .kpi {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        .kpi-label { color: var(--muted-fg); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--fg); margin-top: 4px; }
-        .kpi-sub { color: var(--primary); font-size: 0.75rem; margin-top: 4px; }
-        .map-container {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 32px;
-        }
-        .map-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .map-header h3 { font-size: 0.85rem; color: var(--fg); font-weight: 500; }
-        .map-legend { display: flex; gap: 12px; font-size: 0.7rem; }
-        .legend-item { display: flex; align-items: center; gap: 4px; color: var(--muted-fg); }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-        #map { aspect-ratio: 2 / 1; width: 100%; max-height: 400px; }
-        .city-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
-            margin-bottom: 32px;
-        }
-        .city-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            transition: border-color 150ms ease;
-        }
-        .city-card:hover { border-color: var(--primary); }
-        .city-name { font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 6px; }
-        .city-temp { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-        .city-condition { font-size: 0.7rem; color: var(--muted-fg); }
-        .city-detail { font-size: 0.65rem; color: var(--muted-fg); margin-top: 6px; }
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-        .chart-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            min-width: 0;
-        }
-        .chart-card h4 { font-size: 0.8rem; color: var(--muted-fg); margin-bottom: 12px; font-weight: 500; }
-        .chart-container { height: 220px; position: relative; width: 100%; }
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-        .insight-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        .insight-card h5 { font-size: 0.75rem; color: var(--primary); margin-bottom: 6px; font-weight: 500; }
-        .insight-card p { font-size: 0.8rem; color: var(--muted-fg); line-height: 1.5; }
-        .pipeline-status {
-            display: flex;
-            gap: 24px;
-            padding: 16px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-        .status-item { display: flex; align-items: center; gap: 8px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
-        .status-label { font-size: 0.75rem; color: var(--muted-fg); }
-        .status-value { font-size: 0.75rem; color: var(--fg); }
-        .footer {
-            padding: 16px 32px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--muted-fg);
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .footer a { color: var(--primary); text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
-        .leaflet-popup-content-wrapper {
-            background: var(--card);
-            color: var(--fg);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-        .leaflet-popup-tip { background: var(--card); }
-        .popup-content { text-align: center; padding: 4px; }
-        .popup-city { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
-        .popup-temp { font-size: 1.3rem; color: var(--primary); font-weight: 700; }
-        .popup-details { color: var(--muted-fg); font-size: 0.75rem; margin-top: 6px; }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Compare weather observations across five Philippine cities and see how the data pipeline collects, transforms, and publishes them.">
+    <meta name="theme-color" content="#102d47">
+    <title>Philippine Weather Pipeline · Weather Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="dashboard/weather.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
+    <script src="dashboard/weather.js" defer></script>
 </head>
 <body>
-    <div class="header">
-        <h1>PH Weather Pipeline</h1>
-        <div class="header-meta">
-            Last updated: 11:25 AM<br>
-            Auto-refresh every 30 min
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="shell header-inner">
+            <a class="brand" href="./"><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#12334e"/><path d="M7 22h5l3-9 5 13 3-8h6" fill="none" stroke="#a8e5ed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> PH Weather Pipeline</a>
+            <nav aria-label="Dashboard sections"><a href="#conditions">Conditions</a><a href="#compare">Compare</a><a href="#pipeline">Pipeline</a></nav>
+            <a class="repo" href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline">GitHub <span aria-hidden="true">↗</span></a>
         </div>
-    </div>
-    <div class="problem-section">
-        <div class="problem-label">Problem Statement</div>
-        <div class="problem-text">
-            Weather data across the <strong>Philippine archipelago varies significantly by region</strong>.
-            No automated pipeline existed to collect, transform, and visualize real-time weather data
-            for multiple cities in a <strong>structured, analytics-ready format</strong>.
-        </div>
-    </div>
-    <div class="main">
-        <div class="section-header">
-            <div class="section-num">1</div>
-            <div class="section-title">What is the weather right now across Philippine cities?</div>
-            <div class="section-answer">31.6&deg;C average, ranging from 31&deg;C to 32&deg;C</div>
-        </div>
-        <div class="kpi-row">
-            <div class="kpi">
-                <div class="kpi-label">Average Temperature</div>
-                <div class="kpi-value">31.6&deg;C</div>
-                <div class="kpi-sub">Range: 1&deg;C spread</div>
+    </header>
+
+    <main class="shell" id="main" tabindex="-1">
+        <section class="hero" aria-labelledby="title">
+            <div>
+                <p class="eyebrow">Philippines / Weather observatory</p>
+                <h1 id="title">Weather across<br> five Philippine cities</h1>
+                <p class="hero-description">Compare temperature, humidity, and wind from Luzon to Mindanao in one dashboard.</p>
+                <a class="hero-action" href="#conditions">Explore city readings <span aria-hidden="true">↓</span></a>
             </div>
-            <div class="kpi">
-                <div class="kpi-label">Hottest City</div>
-                <div class="kpi-value">32&deg;C</div>
-                <div class="kpi-sub">Manila</div>
+            <div class="snapshot" aria-live="polite">
+                <p class="eyebrow">OpenWeather data</p>
+                <p class="snapshot-state" id="snapshot-state">Weather snapshot</p>
+                <p class="snapshot-detail" id="snapshot-detail">Readings are published on a 30-minute schedule when available.</p>
+                <a class="snapshot-link" href="dashboard/weather.json">View source snapshot <span aria-hidden="true">↗</span></a>
             </div>
-            <div class="kpi">
-                <div class="kpi-label">Coolest City</div>
-                <div class="kpi-value">31&deg;C</div>
-                <div class="kpi-sub">Cebu City</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Avg Humidity</div>
-                <div class="kpi-value">63%</div>
-                <div class="kpi-sub">across all cities</div>
-            </div>
-        </div>
-        <div class="map-container">
-            <div class="map-header">
-                <h3>Geographic Distribution</h3>
-                <div class="map-legend">
-                    <div class="legend-item"><div class="legend-dot" style="background:#ff3b30"></div> 32&deg;C+</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#ff9500"></div> 30-31&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#0071e3"></div> 28-29&deg;C</div>
-                    <div class="legend-item"><div class="legend-dot" style="background:#34c759"></div> Below 28&deg;C</div>
+        </section>
+
+        <dl class="metrics" aria-label="Snapshot at a glance">
+            <div><dt>Average temperature</dt><dd id="average-temp">—</dd><dd class="note">Across available cities</dd></div>
+            <div><dt>Temperature range</dt><dd id="temp-range">—</dd><dd class="note">Lowest to highest</dd></div>
+            <div><dt>Average humidity</dt><dd id="average-humidity">—</dd><dd class="note">Across available cities</dd></div>
+            <div><dt>Coverage</dt><dd id="coverage">—</dd><dd class="note">Cities with readings</dd></div>
+        </dl>
+        <noscript><p class="notice">Enable JavaScript for the interactive dashboard, or open the <a href="dashboard/weather.json">source snapshot</a>.</p></noscript>
+        <p class="notice" id="load-error" role="status" hidden></p>
+
+        <section class="section" id="conditions" tabindex="-1" aria-labelledby="conditions-title">
+            <p class="eyebrow">01 / City observations</p>
+            <h2 id="conditions-title">Explore the snapshot</h2>
+            <p class="lede">Select a city to see what it feels like, its humidity, and wind speed.</p>
+            <div class="conditions-grid">
+                <div class="panel city-panel">
+                    <h3>City readings</h3>
+                    <ul class="cities" id="cities" role="list"></ul>
+                    <div class="city-detail" id="city-detail" aria-live="polite" hidden>
+                        <h4 id="detail-city"></h4>
+                        <dl id="detail-metrics"></dl>
+                        <p id="detail-time"></p>
+                    </div>
+                </div>
+                <div class="panel map-panel">
+                    <div class="map-heading"><div><h3>Observation map</h3><p>Philippines · Five locations</p></div><button id="reset-map" type="button" hidden>Reset view</button></div>
+                    <p id="map-status" role="status">Loading the observation map…</p>
+                    <div id="map" class="leaflet-container" role="region" aria-label="Map of Philippine weather observations" hidden></div>
                 </div>
             </div>
-            <div id="map"></div>
-        </div>
-        <div class="city-grid" id="city-grid">
-            <div class="city-card">
-                    <div class="city-name">Manila</div>
-                    <div class="city-temp" style="color:#ff3b30">32&deg;C</div>
-                    <div class="city-condition">Few Clouds</div>
-                    <div class="city-detail">Feels 37&deg;C | 62% | 13km/h</div>
-                </div>
-<div class="city-card">
-                    <div class="city-name">Cebu City</div>
-                    <div class="city-temp" style="color:#ff9500">31&deg;C</div>
-                    <div class="city-condition">Few Clouds</div>
-                    <div class="city-detail">Feels 37&deg;C | 70% | 15km/h</div>
-                </div>
-<div class="city-card">
-                    <div class="city-name">Davao City</div>
-                    <div class="city-temp" style="color:#ff9500">31&deg;C</div>
-                    <div class="city-condition">Few Clouds</div>
-                    <div class="city-detail">Feels 35&deg;C | 62% | 10km/h</div>
-                </div>
-<div class="city-card">
-                    <div class="city-name">Makati</div>
-                    <div class="city-temp" style="color:#ff3b30">32&deg;C</div>
-                    <div class="city-condition">Few Clouds</div>
-                    <div class="city-detail">Feels 37&deg;C | 62% | 14km/h</div>
-                </div>
-<div class="city-card">
-                    <div class="city-name">Quezon City</div>
-                    <div class="city-temp" style="color:#ff3b30">32&deg;C</div>
-                    <div class="city-condition">Few Clouds</div>
-                    <div class="city-detail">Feels 35&deg;C | 58% | 13km/h</div>
-                </div>
-        </div>
-        <div class="section-header">
-            <div class="section-num">2</div>
-            <div class="section-title">How do cities compare to each other?</div>
-            <div class="section-answer">Manila is 1&deg;C warmer than Cebu City</div>
-        </div>
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h4>Temperature Comparison</h4>
-                <div class="chart-container"><canvas id="tempChart"></canvas></div>
+        </section>
+
+        <section class="section" id="compare" tabindex="-1" aria-labelledby="compare-title">
+            <p class="eyebrow">02 / Side-by-side comparison</p>
+            <h2 id="compare-title">Temperature and humidity</h2>
+            <p class="lede">Compare readings from the same published snapshot. Cities without readings are excluded.</p>
+            <div class="comparison-grid">
+                <article class="panel comparison temperature"><h3>Air temperature</h3><ol id="temperature-bars" class="bars" role="list" aria-label="Cities ranked by temperature"></ol></article>
+                <article class="panel comparison humidity"><h3>Relative humidity</h3><ol id="humidity-bars" class="bars" role="list" aria-label="Cities ranked by relative humidity"></ol></article>
             </div>
-            <div class="chart-card">
-                <h4>Humidity Levels</h4>
-                <div class="chart-container"><canvas id="humidityChart"></canvas></div>
-            </div>
-        </div>
-        <div class="section-header">
-            <div class="section-num">3</div>
-            <div class="section-title">What patterns emerge from the data?</div>
-            <div class="section-answer">1 condition across 5 cities</div>
-        </div>
-        <div class="insights-grid">
-            <div class="insight-card">
-                <h5>Regional Variation</h5>
-                <p>Temperature varies by 1&deg;C across the archipelago. Manila leads at 32&deg;C, while Cebu City is coolest at 31&deg;C.</p>
-            </div>
-            <div class="insight-card">
-                <h5>Humidity Range</h5>
-                <p>Cebu City has the highest humidity at 70%. All cities are currently dry.</p>
-            </div>
-            <div class="insight-card">
-                <h5>Weather Conditions</h5>
-                <p>Clouds. The archipelago's geography creates varying weather patterns across regions.</p>
-            </div>
-            <div class="insight-card">
-                <h5>Data Pipeline</h5>
-                <p>OpenWeatherMap API provides raw data. GitHub Actions triggers the pipeline every 30 minutes. dbt transforms raw JSON into a Snowflake star schema for analysis.</p>
-            </div>
-        </div>
-        <div class="section-header">
-            <div class="section-num">4</div>
-            <div class="section-title">Is the pipeline delivering fresh, reliable data?</div>
-        </div>
-        <div class="pipeline-status">
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Pipeline</div><div class="status-value">Active</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Schedule</div><div class="status-value">Every 30 min</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Cities</div><div class="status-value">5 tracked</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Data Source</div><div class="status-value">OpenWeatherMap API</div></div>
-            <div class="status-item"><div class="status-dot"></div><div class="status-label">Last Updated</div><div class="status-value">11:25 AM</div></div>
-        </div>
-    </div>
-    <div class="footer">
-        <div>Built by <a href="https://steve-villa-devportfolio.netlify.app/" target="_blank">Steve A. Villa</a> | Data: OpenWeatherMap API</div>
-        <div><a href="https://github.com/kaizen-2004/real-time-end-to-end-weather-pipeline" target="_blank">GitHub</a></div>
-    </div>
-    <script>
-        const weatherData = [{"city": "Manila", "lat": 14.5995, "lon": 120.9842, "temp": 32, "feels_like": 37, "humidity": 62, "wind": 13, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Cebu City", "lat": 10.3157, "lon": 123.8854, "temp": 31, "feels_like": 37, "humidity": 70, "wind": 15, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Davao City", "lat": 7.1907, "lon": 125.4553, "temp": 31, "feels_like": 35, "humidity": 62, "wind": 10, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Makati", "lat": 14.5547, "lon": 121.05, "temp": 32, "feels_like": 37, "humidity": 62, "wind": 14, "condition": "Clouds", "description": "Few Clouds"}, {"city": "Quezon City", "lat": 14.676, "lon": 121.0437, "temp": 32, "feels_like": 35, "humidity": 58, "wind": 13, "condition": "Clouds", "description": "Few Clouds"}];
-        function getMarkerColor(temp) {
-            if (temp >= 32) return '#ff3b30';
-            if (temp >= 30) return '#ff9500';
-            if (temp >= 28) return '#0071e3';
-            return '#34c759';
-        }
-        function initMap() {
-            const map = L.map('map', { zoomControl: false }).setView([12.8797, 121.7740], 6);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: 'OpenStreetMap, CARTO', maxZoom: 19
-            }).addTo(map);
-            weatherData.forEach(city => {
-                const marker = L.circleMarker([city.lat, city.lon], {
-                    radius: 18, fillColor: getMarkerColor(city.temp), color: '#fff', weight: 2, fillOpacity: 0.9
-                }).addTo(map);
-                marker.bindPopup('<div class="popup-content"><div class="popup-city">' + city.city + '</div><div class="popup-temp">' + city.temp + '&deg;C</div><div class="popup-details">' + city.description + '<br>Feels ' + city.feels_like + '&deg;C | ' + city.humidity + '% | ' + city.wind + 'km/h</div></div>');
-                marker.bindTooltip(city.city, { permanent: true, direction: 'top', offset: [0, -12] });
-            });
-        }
-        function initCharts() {
-            new Chart(document.getElementById('tempChart'), {
-                type: 'bar',
-                data: { labels: weatherData.map(d => d.city), datasets: [{ data: weatherData.map(d => d.temp), backgroundColor: weatherData.map(d => getMarkerColor(d.temp)), borderRadius: 4, barThickness: 28 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 20, max: 40, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6e6e73' } }, x: { grid: { display: false }, ticks: { color: '#6e6e73' } } } }
-            });
-            new Chart(document.getElementById('humidityChart'), {
-                type: 'bar',
-                data: { labels: weatherData.map(d => d.city), datasets: [{ data: weatherData.map(d => d.humidity), backgroundColor: '#0071e3', borderRadius: 4, barThickness: 28 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 50, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6e6e73' } }, x: { grid: { display: false }, ticks: { color: '#6e6e73' } } } }
-            });
-        }
-        initMap();
-        initCharts();
-    </script>
+        </section>
+
+        <section class="section pipeline" id="pipeline" tabindex="-1" aria-labelledby="pipeline-title">
+            <p class="eyebrow">03 / Data engineering</p>
+            <h2 id="pipeline-title">From API to analytics</h2>
+            <p class="lede">The warehouse pipeline and the public dashboard share OpenWeather as their source.</p>
+            <ol class="steps" role="list">
+                <li><span>01 / Extract</span><h3>OpenWeather + Airflow</h3><p>Airflow schedules requests for five cities every 30 minutes.</p></li>
+                <li><span>02 / Stage</span><h3>PostgreSQL</h3><p>Raw weather responses are stored as JSONB.</p></li>
+                <li><span>03 / Model</span><h3>dbt + Snowflake</h3><p>dbt builds city and date dimensions, plus weather readings and daily facts.</p></li>
+            </ol>
+            <p class="pipeline-note"><strong>Public dashboard:</strong> A separate GitHub Actions job fetches observations directly from OpenWeather and publishes the JSON snapshot used here.</p>
+        </section>
+    </main>
+
+    <footer><div class="shell footer-inner"><p>Weather data from <a href="https://openweathermap.org/">OpenWeather</a></p><p>Built by <a href="https://steve-villa-devportfolio.netlify.app/">Steve A. Villa</a></p></div></footer>
 </body>
 </html>
