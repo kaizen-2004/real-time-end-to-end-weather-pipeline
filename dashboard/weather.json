@@ -1,60 +1,60 @@
 {
-  "published_at": "2026-11-28T03:40:26.893476+00:00",
+  "published_at": "2026-11-28T12:38:29.998592+00:00",
   "cities": [
     {
       "city": "Manila",
       "lat": 14.5995,
       "lon": 120.9842,
-      "temp": 32,
-      "feels_like": 37,
-      "humidity": 62,
-      "wind": 6,
-      "description": "Few Clouds",
-      "observed_at": "2026-11-28T03:40:26+00:00"
+      "temp": 28,
+      "feels_like": 32,
+      "humidity": 80,
+      "wind": 7,
+      "description": "Broken Clouds",
+      "observed_at": "2026-11-28T12:30:39+00:00"
     },
     {
       "city": "Cebu City",
       "lat": 10.3157,
       "lon": 123.8854,
-      "temp": 31,
-      "feels_like": 35,
-      "humidity": 62,
+      "temp": 29,
+      "feels_like": 32,
+      "humidity": 70,
       "wind": 15,
-      "description": "Clear Sky",
-      "observed_at": "2026-11-28T03:40:26+00:00"
+      "description": "Broken Clouds",
+      "observed_at": "2026-11-28T12:38:29+00:00"
     },
     {
       "city": "Davao City",
       "lat": 7.1907,
       "lon": 125.4553,
-      "temp": 31,
-      "feels_like": 35,
-      "humidity": 62,
-      "wind": 12,
-      "description": "Scattered Clouds",
-      "observed_at": "2026-11-28T03:33:19+00:00"
+      "temp": 28,
+      "feels_like": 32,
+      "humidity": 84,
+      "wind": 3,
+      "description": "Clear Sky",
+      "observed_at": "2026-11-28T12:38:29+00:00"
     },
     {
       "city": "Makati",
       "lat": 14.5547,
       "lon": 121.05,
-      "temp": 32,
-      "feels_like": 37,
-      "humidity": 63,
+      "temp": 28,
+      "feels_like": 32,
+      "humidity": 80,
       "wind": 8,
-      "description": "Few Clouds",
-      "observed_at": "2026-11-28T03:40:26+00:00"
+      "description": "Broken Clouds",
+      "observed_at": "2026-11-28T12:35:28+00:00"
     },
     {
       "city": "Quezon City",
       "lat": 14.676,
       "lon": 121.0437,
-      "temp": 32,
-      "feels_like": 35,
-      "humidity": 58,
-      "wind": 6,
-      "description": "Few Clouds",
-      "observed_at": "2026-11-28T03:36:39+00:00"
+      "temp": 28,
+      "feels_like": 31,
+      "humidity": 78,
+      "wind": 7,
+      "description": "Broken Clouds",
+      "observed_at": "2026-11-28T12:30:30+00:00"
     }
   ]
 }
