@@ -1,60 +1,60 @@
 {
-  "published_at": "2026-11-27T21:45:57.025199+00:00",
+  "published_at": "2026-11-28T03:40:26.893476+00:00",
   "cities": [
     {
       "city": "Manila",
       "lat": 14.5995,
       "lon": 120.9842,
-      "temp": 26,
-      "feels_like": 27,
-      "humidity": 88,
-      "wind": 2,
+      "temp": 32,
+      "feels_like": 37,
+      "humidity": 62,
+      "wind": 6,
       "description": "Few Clouds",
-      "observed_at": "2026-11-27T21:45:56+00:00"
+      "observed_at": "2026-11-28T03:40:26+00:00"
     },
     {
       "city": "Cebu City",
       "lat": 10.3157,
       "lon": 123.8854,
-      "temp": 26,
-      "feels_like": 27,
-      "humidity": 89,
-      "wind": 6,
-      "description": "Scattered Clouds",
-      "observed_at": "2026-11-27T21:45:56+00:00"
+      "temp": 31,
+      "feels_like": 35,
+      "humidity": 62,
+      "wind": 15,
+      "description": "Clear Sky",
+      "observed_at": "2026-11-28T03:40:26+00:00"
     },
     {
       "city": "Davao City",
       "lat": 7.1907,
       "lon": 125.4553,
-      "temp": 24,
-      "feels_like": 25,
-      "humidity": 94,
-      "wind": 4,
-      "description": "Clear Sky",
-      "observed_at": "2026-11-27T21:45:41+00:00"
+      "temp": 31,
+      "feels_like": 35,
+      "humidity": 62,
+      "wind": 12,
+      "description": "Scattered Clouds",
+      "observed_at": "2026-11-28T03:33:19+00:00"
     },
     {
       "city": "Makati",
       "lat": 14.5547,
       "lon": 121.05,
-      "temp": 26,
-      "feels_like": 26,
-      "humidity": 88,
-      "wind": 2,
+      "temp": 32,
+      "feels_like": 37,
+      "humidity": 63,
+      "wind": 8,
       "description": "Few Clouds",
-      "observed_at": "2026-11-27T21:45:56+00:00"
+      "observed_at": "2026-11-28T03:40:26+00:00"
     },
     {
       "city": "Quezon City",
       "lat": 14.676,
       "lon": 121.0437,
-      "temp": 25,
-      "feels_like": 26,
-      "humidity": 89,
-      "wind": 2,
+      "temp": 32,
+      "feels_like": 35,
+      "humidity": 58,
+      "wind": 6,
       "description": "Few Clouds",
-      "observed_at": "2026-11-27T21:45:57+00:00"
+      "observed_at": "2026-11-28T03:36:39+00:00"
     }
   ]
 }
